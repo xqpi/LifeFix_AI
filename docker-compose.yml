@@ -4,8 +4,8 @@ services:
     container_name: lifefix-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: lifefix
-      POSTGRES_USER: lifefix_user
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
