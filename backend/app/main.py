@@ -42,12 +42,11 @@ def check_database_health(db: Session = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))
         return {
-            "status": "success",
-            "database": "connected",
-            "message": "Database connection is working successfully"
+            "status": "ok",
+            "database": "connected"
         }
-    except Exception as error:
+    except Exception:
         raise HTTPException(
             status_code=500,
-            detail=f"Database connection failed: {str(error)}"
+            detail="Database connection failed"
         )
