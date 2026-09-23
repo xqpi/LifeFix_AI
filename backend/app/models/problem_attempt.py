@@ -31,6 +31,12 @@ class ProblemAttempt(Base):
         nullable=True,
         index=True,
     )
+    parent_attempt_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid,
+        ForeignKey("problem_attempts.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     user_message: Mapped[str] = mapped_column(Text, nullable=False)
     ai_response: Mapped[str] = mapped_column(Text, nullable=False)
     was_successful: Mapped[bool | None] = mapped_column(
@@ -44,6 +50,12 @@ class ProblemAttempt(Base):
     user: Mapped["User"] = relationship(back_populates="problem_attempts")
     original_problem: Mapped["Problem | None"] = relationship(
         back_populates="attempts"
+    )
+    parent_attempt: Mapped["ProblemAttempt | None"] = relationship(
+        back_populates="refinements", remote_side=[id]
+    )
+    refinements: Mapped[list["ProblemAttempt"]] = relationship(
+        back_populates="parent_attempt"
     )
     feedbacks: Mapped[list["Feedback"]] = relationship(
         back_populates="attempt", cascade="all, delete-orphan"
