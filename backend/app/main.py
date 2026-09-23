@@ -11,6 +11,7 @@ from app.schemas.solver import (
     AttemptFeedbackRequest,
     AttemptFeedbackResponse,
     LifeFixSolutionResponse,
+    RefineProblemRequest,
     SolveProblemRequest,
 )
 from app.services.attempt_service import AttemptService
@@ -169,4 +170,39 @@ def record_attempt_feedback(
         raise HTTPException(
             status_code=500,
             detail="An error occurred while recording feedback.",
+        )
+
+
+@app.post(
+    "/api/attempts/{attempt_id}/refine",
+    response_model=LifeFixSolutionResponse,
+    status_code=200,
+)
+def refine_problem_attempt(
+    attempt_id: uuid.UUID,
+    payload: RefineProblemRequest,
+    db: Session = Depends(get_db),
+):
+    """Refine an unsuccessful problem attempt with additional context, producing a new child attempt."""
+    try:
+        response = attempt_service.refine_attempt(
+            db=db,
+            attempt_id=attempt_id,
+            request=payload,
+            solver_service=problem_solver_service,
+        )
+        if response is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Problem attempt not found.",
+            )
+        return response
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while refining the problem attempt.",
         )

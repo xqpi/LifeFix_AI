@@ -290,6 +290,7 @@ class ProblemSolverService:
         request: SolveProblemRequest,
         rag_context: RAGContextResponse,
         response: LifeFixSolutionResponse,
+        parent_attempt_id: uuid.UUID | None = None,
     ) -> LifeFixSolutionResponse:
         """Persist a ProblemAttempt to PostgreSQL with transaction safety.
 
@@ -298,6 +299,7 @@ class ProblemSolverService:
             request: The user's original solve problem request.
             rag_context: The retrieved RAG context.
             response: The generated solution response (from LLM or fallback).
+            parent_attempt_id: Optional UUID of the parent ProblemAttempt if this is a refinement.
 
         Returns:
             LifeFixSolutionResponse: The solution response containing the persisted attempt_id.
@@ -328,7 +330,7 @@ class ProblemSolverService:
                 id=attempt_id,
                 user_id=guest_user.id,
                 original_problem_id=original_problem_id,
-                parent_attempt_id=None,
+                parent_attempt_id=parent_attempt_id,
                 user_message=request.problem_description.strip(),
                 ai_response=ai_response_json,
                 was_successful=None,
@@ -352,6 +354,7 @@ class ProblemSolverService:
         db: Session,
         request: SolveProblemRequest,
         top_k: int = DEFAULT_TOP_K,
+        parent_attempt_id: uuid.UUID | None = None,
     ) -> LifeFixSolutionResponse:
         """Execute the full problem solving pipeline: RAG retrieval -> LLM generation -> fallback -> persistence.
 
@@ -359,6 +362,7 @@ class ProblemSolverService:
             db: SQLAlchemy database session.
             request: Validated user problem request.
             top_k: Number of similar cases to retrieve for RAG context.
+            parent_attempt_id: Optional UUID of the parent ProblemAttempt for refinements.
 
         Returns:
             LifeFixSolutionResponse: Structured solution response with persisted attempt_id.
@@ -404,4 +408,5 @@ class ProblemSolverService:
             request=request,
             rag_context=rag_context,
             response=response,
+            parent_attempt_id=parent_attempt_id,
         )

@@ -210,13 +210,27 @@ This document tracks the technical implementation progress for the LifeFix proje
     - Transaction safety: wraps operations in a single atomic transaction with rollback on failure.
   - Added endpoint `POST /api/attempts/{attempt_id}/feedback` in `backend/app/main.py`.
   - Created and applied Alembic migration `ff4b099528df` (`make_feedback_rating_nullable`) making `Feedback.rating` nullable to support comment-only feedback without fabricating ratings.
-  - Solution refinement is intentionally deferred to Step 8.4.
+
+- Implemented Problem Refinement After Unsuccessful Feedback (Step 8.4):
+  - Defined request schema `RefineProblemRequest` in `backend/app/schemas/solver.py` with validation rejecting empty or whitespace-only `additional_information`.
+  - Implemented `refine_attempt()` in `AttemptService` (`backend/app/services/attempt_service.py`):
+    - Precondition validation: parent attempt must exist, belong to the guest user, and strictly have `was_successful == False`.
+    - Returns HTTP 400 (`"Only unsuccessful problem attempts can be refined."`) if `was_successful` is `True` or `None`.
+    - Returns HTTP 404 (`"Problem attempt not found."`) if parent attempt does not exist or belongs to another user.
+    - Combines parent problem context and new details into a coherent prompt (with localized formatting for Arabic and English).
+    - Invokes `ProblemSolverService.solve()` passing `parent_attempt_id=parent_attempt.id`.
+  - Updated `ProblemSolverService` in `backend/app/services/problem_solver_service.py`:
+    - `_persist_attempt()` accepts optional `parent_attempt_id` and sets `ProblemAttempt.parent_attempt_id`.
+    - Initial solves continue to default to `parent_attempt_id = None`.
+    - Preserves parent attempt immutability (historical record remains unchanged; parent's `refinements` relationship tracks children).
+    - Child attempt is created with `was_successful = None` ready for future feedback or multi-turn refinement.
+  - Added endpoint `POST /api/attempts/{attempt_id}/refine` in `backend/app/main.py` returning HTTP 200 with schema-validated `LifeFixSolutionResponse` containing the new child `attempt_id`.
 
 ---
 
 ## Current Status
 
-- Steps 1–8.3 are completed.
+- Steps 1–8.4 are completed.
 - PostgreSQL database contains the 384-dimensional vector column and active HNSW cosine index.
 - The `EmbeddingService` generates normalized multilingual E5 embeddings.
 - A sample development catalog of 18 problems across 7 categories is seeded with stored embeddings.
@@ -226,4 +240,5 @@ This document tracks the technical implementation progress for the LifeFix proje
 - AI problem-solving endpoint `POST /api/solve` is implemented and operational via `ProblemSolverService`, `LLMService`, and `google-genai` (targeting `gemini-2.5-flash`), with deterministic RAG fallback on network/provider failure.
 - Every successful solve request persists an initial `ProblemAttempt` in PostgreSQL linked to the development guest user, returning the database `attempt_id`.
 - User feedback endpoint `POST /api/attempts/{attempt_id}/feedback` updates `ProblemAttempt.was_successful` and idempotently records rating and comments in `feedbacks`.
+- Solution refinement endpoint `POST /api/attempts/{attempt_id}/refine` allows refining unsuccessful attempts with additional context, producing linked child attempts in multi-turn chains.
 - No frontend integration or authentication has been implemented yet.

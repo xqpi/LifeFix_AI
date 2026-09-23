@@ -114,3 +114,19 @@ class AttemptFeedbackResponse(BaseModel):
     was_successful: bool = Field(description="Whether the attempt successfully solved the problem")
     feedback_recorded: bool = Field(description="Whether detailed feedback (rating/comment) was recorded")
     message: str = Field(description="User-facing confirmation message")
+
+
+class RefineProblemRequest(BaseModel):
+    """User request payload for refining an unsuccessful problem attempt."""
+
+    additional_information: str = Field(..., description="Additional context or details to refine the solution")
+
+    @field_validator("additional_information")
+    @classmethod
+    def validate_additional_information(cls, v: str) -> str:
+        if not isinstance(v, str):
+            raise ValueError("additional_information must be a string.")
+        cleaned = v.strip()
+        if not cleaned:
+            raise ValueError("additional_information cannot be empty or contain only whitespace.")
+        return cleaned

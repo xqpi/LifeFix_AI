@@ -9,7 +9,14 @@ from sqlalchemy.orm import Session
 from app.models.feedback import Feedback
 from app.models.problem_attempt import ProblemAttempt
 from app.models.user import User
-from app.schemas.solver import AttemptFeedbackRequest, AttemptFeedbackResponse
+from app.schemas.solver import (
+    AttemptFeedbackRequest,
+    AttemptFeedbackResponse,
+    LifeFixSolutionResponse,
+    RefineProblemRequest,
+    SolveProblemRequest,
+)
+from app.services.problem_solver_service import ProblemSolverService
 
 logger = logging.getLogger(__name__)
 
@@ -146,4 +153,75 @@ class AttemptService:
             was_successful=attempt.was_successful,
             feedback_recorded=feedback_recorded,
             message=message,
+        )
+
+    def refine_attempt(
+        self,
+        db: Session,
+        attempt_id: uuid.UUID,
+        request: RefineProblemRequest,
+        solver_service: ProblemSolverService,
+    ) -> LifeFixSolutionResponse | None:
+        """Refine an unsuccessful problem attempt by appending additional context.
+
+        Validates parent attempt existence, guest ownership, and that the parent
+        attempt was marked unsuccessful. Combines the original context and new
+        clarifications, then runs the full solve pipeline to persist a new child
+        ProblemAttempt linked to the parent.
+
+        Args:
+            db: Active SQLAlchemy database session.
+            attempt_id: UUID of the parent ProblemAttempt.
+            request: Validated RefineProblemRequest containing additional_information.
+            solver_service: Injected ProblemSolverService instance.
+
+        Returns:
+            LifeFixSolutionResponse | None: The new child attempt solution response,
+            or None if the parent attempt is not found or not owned by guest (triggers 404).
+
+        Raises:
+            ValueError: If the parent attempt was not marked unsuccessful (status is None or True).
+            RuntimeError: If database persistence or guest user lookup fails.
+        """
+        guest_user = self._get_guest_user(db)
+
+        # 1. Enforce ownership and lookup parent attempt
+        attempt = db.scalars(
+            select(ProblemAttempt).where(
+                ProblemAttempt.id == attempt_id,
+                ProblemAttempt.user_id == guest_user.id,
+            )
+        ).first()
+
+        if not attempt:
+            return None
+
+        # 2. Strict precondition: only unsuccessful attempts can be refined
+        if attempt.was_successful is not False:
+            raise ValueError("Only unsuccessful problem attempts can be refined.")
+
+        # 3. Combine original problem context and new details cleanly
+        clean_additional_info = request.additional_information.strip()
+        is_ar = self._is_arabic(attempt.user_message) or self._is_arabic(clean_additional_info)
+
+        if is_ar:
+            combined_query = (
+                f"المشكلة السابقة:\n{attempt.user_message}\n\n"
+                f"معلومات وتفاصيل إضافية:\n{clean_additional_info}"
+            )
+        else:
+            combined_query = (
+                f"Original problem:\n{attempt.user_message}\n\n"
+                f"Additional information:\n{clean_additional_info}"
+            )
+
+        # 4. Execute the solve pipeline with parent link
+        solve_request = SolveProblemRequest(
+            problem_description=combined_query,
+        )
+
+        return solver_service.solve(
+            db=db,
+            request=solve_request,
+            parent_attempt_id=attempt.id,
         )
