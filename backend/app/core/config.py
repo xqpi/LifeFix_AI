@@ -34,3 +34,21 @@ if missing_vars:
 
 # Build SQLAlchemy connection URL using psycopg 3
 DATABASE_URL = f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}"
+
+# Gemini LLM configuration
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+
+def get_gemini_api_key() -> str:
+    """Return the configured GEMINI_API_KEY or raise ValueError if missing or empty.
+
+    This ensures database and other services can start without requiring GEMINI_API_KEY,
+    while LLM initialization fails clearly when the key is missing.
+    """
+    key = os.getenv("GEMINI_API_KEY") or GEMINI_API_KEY
+    if not key or not key.strip():
+        raise ValueError(
+            "GEMINI_API_KEY is not set or empty. "
+            f"Please ensure GEMINI_API_KEY is defined in: {ENV_PATH}"
+        )
+    return key.strip()

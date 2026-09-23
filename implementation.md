@@ -150,18 +150,46 @@ This document tracks the technical implementation progress for the LifeFix proje
     - Confirmed raw embedding vectors are never exposed or returned in API responses.
     - Confirmed with `alembic check` that no new database migrations or schema modifications are required.
 
+- Implemented Gemini LLM Problem Solving Integration (Step 7.2):
+  - Installed and pinned the official modern Google GenAI SDK (`google-genai==2.25.0`) in `backend/requirements.txt` (avoiding deprecated `google-generativeai`).
+  - Configured `GEMINI_API_KEY` in `backend/app/core/config.py` read safely from root `.env` without exposing keys in logs, exceptions, or responses.
+  - Configured Google Gemini model `gemini-2.5-flash` for low-latency, structured everyday problem solving.
+  - Defined robust Pydantic v2 schemas in `backend/app/schemas/solver.py`:
+    - `SolveProblemRequest`: Validates `problem_description` (rejecting empty or whitespace-only inputs) and optional `category_hint`.
+    - `LifeFixSolutionStep`: Validates `step_number` (>= 1), `title`, `instruction`, `difficulty`, and `estimated_time_minutes` (>= 0).
+    - `LifeFixSourceCase`: Links problem IDs and titles from retrieved reference cases.
+    - `LifeFixSolutionResponse`: Enforces structured output schema (`understanding`, `possible_causes`, `recommended_steps`, `explanations`, `warnings_or_notes`, `follow_up_question`, `source_cases`).
+  - Implemented `LLMService` in `backend/app/services/llm_service.py`:
+    - Isolated Google GenAI client communication.
+    - Enforced structured JSON output decoding (`response_schema=LifeFixSolutionResponse`).
+    - Configured conservative generation settings (`temperature=0.2`) and 30-second request timeouts.
+    - Wrapped provider exceptions into `LLMServiceError` preventing credential or internal detail leakage.
+  - Implemented `ProblemSolverService` in `backend/app/services/problem_solver_service.py`:
+    - Orchestrates the full RAG -> LLM pipeline by delegating retrieval to `RAGContextService.build_context()`.
+    - Implemented prompt-injection resistance: explicitly separates system instructions, retrieved reference knowledge, and user problem input enclosed in triple quotes.
+    - Embedded safety guardrails: strictly refuses medical diagnoses, legal counsel, hazardous electrical/gas repairs, and illegal activities.
+    - Added multilingual support: instructs the model to respond in natural Arabic for Arabic queries and clear English for English queries, adapting retrieved steps rather than copying blindly.
+    - Implemented deterministic RAG fallback: if Gemini is unreachable (missing API key, rate limit, timeout, or network failure), cleanly constructs a valid `LifeFixSolutionResponse` directly from the top retrieved database solution record with explicit disclosure in `warnings_or_notes` and zero fabricated explanations.
+  - Added `POST /api/solve` endpoint in `backend/app/main.py`:
+    - Validates incoming `SolveProblemRequest` and returns `LifeFixSolutionResponse`.
+    - Preserved all existing endpoints (`GET /`, `GET /api/health/database`, `GET /api/search`, `GET /api/search/context`).
+  - Performed comprehensive verification and regression testing:
+    - Verified all 5 endpoints return `200 OK`.
+    - Verified input validation rejecting empty and whitespace queries with `422 Unprocessable Entity`.
+    - Verified deterministic RAG fallback behavior for English and Arabic requests with zero vector leakage.
+    - Note: Live end-to-end token generation from Google Cloud could not be fully verified because the local runtime environment experienced an outbound `ConnectTimeout` to `generativelanguage.googleapis.com:443`. In an environment with outbound HTTPS access, the exact same code executes the Gemini call directly.
+  - Confirmed with `alembic check` that no database migrations or schema alterations are required.
+
 ---
 
 ## Current Status
 
-- Steps 1–6 are completed (including 6.1 through 6.10).
+- Steps 1–7 are completed (through Step 7.2).
 - PostgreSQL database contains the 384-dimensional vector column and active HNSW cosine index.
 - The `EmbeddingService` generates normalized multilingual E5 embeddings.
 - A sample development catalog of 18 problems across 7 categories is seeded with stored embeddings.
 - A development dataset of 72 realistic solution steps is seeded and linked to the 18 problems.
 - Semantic search is implemented and operational via `SemanticSearchService` and `GET /api/search`.
-- RAG context preparation is implemented and operational via `RAGContextService` and `GET /api/search/context`, delivering ranked problems with ordered solution steps.
-- Retrieval pipeline has been tested with small development queries in English and Arabic; this is an exploratory dev verification and not a formal accuracy benchmark or production dataset.
-- No LLM generation, prompt completion, AI answer synthesis, authentication, or frontend integration has been implemented yet.
-
-
+- RAG context preparation is implemented and operational via `RAGContextService` and `GET /api/search/context`.
+- AI problem-solving endpoint `POST /api/solve` is implemented and operational via `ProblemSolverService`, `LLMService`, and `google-genai` (targeting `gemini-2.5-flash`), with deterministic RAG fallback on network/provider failure.
+- No frontend integration or authentication has been implemented yet.

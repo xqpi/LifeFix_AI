@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session  # pyright: ignore[reportMissingImports]
 from app.db.database import get_db
 from app.schemas.rag import RAGContextResponse
 from app.schemas.search import SearchResponse
+from app.schemas.solver import LifeFixSolutionResponse, SolveProblemRequest
+from app.services.problem_solver_service import ProblemSolverService
 from app.services.rag_context_service import RAGContextService
 from app.services.semantic_search_service import SemanticSearchService
 
@@ -107,4 +109,22 @@ def get_search_rag_context(
             detail="An error occurred while building RAG context.",
         )
 
-
+
+problem_solver_service = ProblemSolverService(rag_context_service=rag_context_service)
+
+
+@app.post("/api/solve", response_model=LifeFixSolutionResponse)
+def solve_problem(
+    payload: SolveProblemRequest,
+    db: Session = Depends(get_db),
+):
+    """Generate a structured, grounded LifeFix solution for a user's problem."""
+    try:
+        return problem_solver_service.solve(db=db, request=payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while solving the problem.",
+        )
