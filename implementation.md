@@ -97,11 +97,29 @@ This document tracks the technical implementation progress for the LifeFix proje
   - Validated English and Arabic queries and passages generating 384-dimensional normalized vectors (L2 norm = 1.0, no NaN/inf values).
   - Tested semantic similarity with an Arabic/English equivalent pair (`اللابتوب عندي بطيء عندما أفتح برامج كثيرة` vs `My laptop becomes slow when I open many applications.`), achieving high cosine similarity (~0.9037) compared to unrelated text (~0.7863).
 
+- Seeded development dataset with sample everyday problems and embeddings:
+  - Created idempotent seed script `backend/scripts/seed_sample_problems.py`.
+  - Populated 7 realistic everyday problem categories (`Technology`, `Study & Productivity`, `Home & Living`, `Travel`, `Personal Finance`, `Food & Cooking`, `Personal Organization`).
+  - Seeded 18 non-healthcare daily life problems (9 in English, 9 in Arabic, including 4 semantically equivalent cross-lingual pairs).
+  - Generated and stored 384-dimensional normalized passage embeddings in `Problem.embedding`.
+  - Confirmed idempotency: repeated executions create 0 duplicate categories, 0 duplicate problems, and perform 0 redundant embeddings.
+- Implemented semantic similarity search service and API endpoint:
+  - Created Pydantic response schemas `SearchResultItem` and `SearchResponse` in `backend/app/schemas/search.py`.
+  - Implemented `SemanticSearchService` in `backend/app/services/semantic_search_service.py` performing pgvector cosine-distance similarity retrieval (`Problem.embedding.cosine_distance(query_vector)` matching the `<=>` operator).
+  - Converted cosine distance directly to similarity score via `similarity = 1.0 - distance` without arbitrary thresholding or truncating.
+  - Implemented `GET /api/search` in `backend/app/main.py` accepting query parameter `q` and optional `top_k` (bounded between 1 and 20, default 5).
+  - Validated query input: rejected empty and whitespace-only queries with `HTTP 400 Bad Request` before invoking the embedding model.
+  - Verified retrieval behavior with English, Arabic, and cross-lingual equivalent queries; relevant problems consistently ranked at or near the top, and unrelated queries produced noticeably lower similarity scores (this exploratory test demonstrates end-to-end functionality and is not a formal accuracy benchmark).
+  - Verified PostgreSQL query planning with `EXPLAIN`: PostgreSQL chose a sequential scan for the tiny 18-row development table (standard cost-based optimizer behavior for small datasets), while running `EXPLAIN` with sequential scans disabled (`enable_seqscan = off`) confirmed that the query correctly uses `Index Scan using ix_problems_embedding_hnsw on problems`.
+
 ---
 
 ## Current Status
 
 - Steps 1–6 are completed.
-- Database contains the vector column and HNSW index.
-- The embedding service is ready for semantic search, problem indexing, and retrieval.
-- No database problems have been populated with embeddings yet.
+- PostgreSQL database contains the 384-dimensional vector column and active HNSW cosine index.
+- The `EmbeddingService` generates normalized multilingual E5 embeddings.
+- A sample development catalog of 18 problems across 7 categories is seeded with stored embeddings.
+- Semantic search is implemented and operational via `SemanticSearchService` and `GET /api/search`.
+- Next steps can proceed to problem solution retrieval, AI-assisted reasoning/RAG, and user workflows.
+
