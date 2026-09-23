@@ -37,6 +37,7 @@ class LifeFixSourceCase(BaseModel):
 class LifeFixSolutionResponse(BaseModel):
     """Structured LifeFix solution response produced by AI problem solving or RAG fallback."""
 
+    attempt_id: str = Field(default="", description="UUID of the persisted problem attempt record")
     understanding: str = Field(min_length=1, description="Empathetic, clear summary of the user's issue")
     possible_causes: list[str] = Field(default_factory=list, description="Likely contributing causes or factors")
     recommended_steps: list[LifeFixSolutionStep] = Field(

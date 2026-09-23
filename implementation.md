@@ -180,11 +180,29 @@ This document tracks the technical implementation progress for the LifeFix proje
     - Note: Live end-to-end token generation from Google Cloud could not be fully verified because the local runtime environment experienced an outbound `ConnectTimeout` to `generativelanguage.googleapis.com:443`. In an environment with outbound HTTPS access, the exact same code executes the Gemini call directly.
   - Confirmed with `alembic check` that no database migrations or schema alterations are required.
 
+- Implemented Problem Attempt Refinement Architecture (Step 8.1):
+  - Added nullable self-referencing `parent_attempt_id` column to `ProblemAttempt` with `ondelete="SET NULL"`.
+  - Configured SQLAlchemy relationships `parent_attempt` and `refinements` in `ProblemAttempt`.
+  - Created Alembic migration `9ce3f900bd5a` (`add_parent_attempt_id_to_problem_attempts`).
+  - Implemented idempotent development guest user seeder (`backend/scripts/seed_development_user.py`) with deterministic ID `00000000-0000-0000-0000-000000000001` and email `guest@lifefix.local`.
+
+- Implemented Initial Solve Attempt Persistence (Step 8.2):
+  - Updated `LifeFixSolutionResponse` schema to include `attempt_id: str` identifying the persisted attempt.
+  - Updated `POST /api/solve` workflow in `ProblemSolverService`:
+    - Looks up the development guest user (`guest@lifefix.local`) to associate with unauthenticated attempts until full authentication is implemented.
+    - Resolves `original_problem_id` to the top-ranked retrieved problem UUID from RAG context, or `NULL` if no cases matched.
+    - Generates a UUID for the attempt and assigns it to `response.attempt_id`.
+    - Serializes the complete validated `LifeFixSolutionResponse` into `problem_attempts.ai_response`.
+    - Persists the new `ProblemAttempt` record (`parent_attempt_id = NULL`, `was_successful = NULL`).
+    - Implemented transaction safety: database persistence failures trigger session rollback and return HTTP 500 without leaking credentials.
+    - Both Gemini AI solutions and deterministic RAG fallback solutions are persisted as standard `ProblemAttempt` records.
+    - Returns `attempt_id` in the API response strictly matching the PostgreSQL `problem_attempts.id`.
+
 ---
 
 ## Current Status
 
-- Steps 1–7 are completed (through Step 7.2).
+- Steps 1–8.2 are completed.
 - PostgreSQL database contains the 384-dimensional vector column and active HNSW cosine index.
 - The `EmbeddingService` generates normalized multilingual E5 embeddings.
 - A sample development catalog of 18 problems across 7 categories is seeded with stored embeddings.
@@ -192,4 +210,5 @@ This document tracks the technical implementation progress for the LifeFix proje
 - Semantic search is implemented and operational via `SemanticSearchService` and `GET /api/search`.
 - RAG context preparation is implemented and operational via `RAGContextService` and `GET /api/search/context`.
 - AI problem-solving endpoint `POST /api/solve` is implemented and operational via `ProblemSolverService`, `LLMService`, and `google-genai` (targeting `gemini-2.5-flash`), with deterministic RAG fallback on network/provider failure.
+- Every successful solve request persists an initial `ProblemAttempt` in PostgreSQL linked to the development guest user, returning the database `attempt_id`.
 - No frontend integration or authentication has been implemented yet.

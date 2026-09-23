@@ -1,10 +1,14 @@
 """Domain orchestrator service for LifeFix AI problem solving with RAG and LLM integration."""
 
 import logging
+import uuid
 from typing import Optional
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.models.problem_attempt import ProblemAttempt
+from app.models.user import User
 from app.schemas.rag import RAGContextResponse
 from app.schemas.solver import (
     LifeFixSolutionResponse,
@@ -261,13 +265,95 @@ class ProblemSolverService:
             source_cases=[],
         )
 
+    DEVELOPMENT_GUEST_EMAIL: str = "guest@lifefix.local"
+
+    def _get_guest_user(self, db: Session) -> User:
+        """Retrieve the development guest user for unauthenticated problem attempts.
+
+        Raises:
+            RuntimeError: If the guest user does not exist in the database.
+        """
+        guest_user = db.scalars(
+            select(User).where(User.email == self.DEVELOPMENT_GUEST_EMAIL)
+        ).first()
+
+        if not guest_user:
+            raise RuntimeError(
+                f"Development guest user '{self.DEVELOPMENT_GUEST_EMAIL}' not found in database. "
+                "Please run scripts/seed_development_user.py before submitting problem attempts."
+            )
+        return guest_user
+
+    def _persist_attempt(
+        self,
+        db: Session,
+        request: SolveProblemRequest,
+        rag_context: RAGContextResponse,
+        response: LifeFixSolutionResponse,
+    ) -> LifeFixSolutionResponse:
+        """Persist a ProblemAttempt to PostgreSQL with transaction safety.
+
+        Args:
+            db: Active SQLAlchemy database session.
+            request: The user's original solve problem request.
+            rag_context: The retrieved RAG context.
+            response: The generated solution response (from LLM or fallback).
+
+        Returns:
+            LifeFixSolutionResponse: The solution response containing the persisted attempt_id.
+
+        Raises:
+            RuntimeError: If database persistence or guest user lookup fails.
+        """
+        try:
+            guest_user = self._get_guest_user(db)
+
+            # Determine best matching retrieved Problem ID if available
+            original_problem_id: uuid.UUID | None = None
+            if rag_context.retrieved_problems:
+                top_problem = rag_context.retrieved_problems[0]
+                try:
+                    original_problem_id = uuid.UUID(top_problem.problem_id)
+                except (ValueError, TypeError, AttributeError):
+                    original_problem_id = None
+
+            # Generate attempt UUID and associate with response before serializing
+            attempt_id = uuid.uuid4()
+            response.attempt_id = str(attempt_id)
+
+            # Serialize the complete validated response into JSON
+            ai_response_json = response.model_dump_json()
+
+            attempt = ProblemAttempt(
+                id=attempt_id,
+                user_id=guest_user.id,
+                original_problem_id=original_problem_id,
+                parent_attempt_id=None,
+                user_message=request.problem_description.strip(),
+                ai_response=ai_response_json,
+                was_successful=None,
+            )
+
+            db.add(attempt)
+            db.commit()
+            db.refresh(attempt)
+
+            # Ensure response.attempt_id strictly matches the persisted DB record
+            response.attempt_id = str(attempt.id)
+            return response
+
+        except Exception as exc:
+            db.rollback()
+            logger.error("Failed to persist ProblemAttempt: %s", exc, exc_info=True)
+            raise RuntimeError("Failed to persist problem attempt to database.") from exc
+
     def solve(
         self,
         db: Session,
         request: SolveProblemRequest,
         top_k: int = DEFAULT_TOP_K,
     ) -> LifeFixSolutionResponse:
-        """Execute the full problem solving pipeline: RAG retrieval -> LLM generation -> fallback.
+        """Execute the full problem solving pipeline: RAG retrieval -> LLM generation -> fallback -> persistence.
 
         Args:
             db: SQLAlchemy database session.
@@ -275,7 +361,7 @@ class ProblemSolverService:
             top_k: Number of similar cases to retrieve for RAG context.
 
         Returns:
-            LifeFixSolutionResponse: Structured solution response.
+            LifeFixSolutionResponse: Structured solution response with persisted attempt_id.
         """
         clean_description = request.problem_description.strip()
 
@@ -286,7 +372,7 @@ class ProblemSolverService:
             top_k=top_k,
         )
 
-        # 2. Attempt LLM generation with Gemini
+        # 2. Attempt LLM generation with Gemini, falling back gracefully to RAG-derived deterministic response
         try:
             prompt = self._build_prompt(request, rag_context)
             llm = self.llm_service
@@ -303,8 +389,6 @@ class ProblemSolverService:
                     if p.solutions
                 ][:3]
 
-            return response
-
         except (LLMServiceError, ValueError, Exception) as exc:
             # Fall back gracefully to RAG-derived deterministic response without crashing
             logger.warning(
@@ -312,4 +396,12 @@ class ProblemSolverService:
                 type(exc).__name__,
                 str(exc),
             )
-            return self._build_fallback_response(request, rag_context)
+            response = self._build_fallback_response(request, rag_context)
+
+        # 3. Persist the generated or fallback solution as a ProblemAttempt
+        return self._persist_attempt(
+            db=db,
+            request=request,
+            rag_context=rag_context,
+            response=response,
+        )
