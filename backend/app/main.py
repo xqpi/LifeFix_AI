@@ -4,7 +4,9 @@ from sqlalchemy import text  # pyright: ignore[reportMissingImports]
 from sqlalchemy.orm import Session  # pyright: ignore[reportMissingImports]
 
 from app.db.database import get_db
+from app.schemas.rag import RAGContextResponse
 from app.schemas.search import SearchResponse
+from app.services.rag_context_service import RAGContextService
 from app.services.semantic_search_service import SemanticSearchService
 
 
@@ -78,4 +80,31 @@ def search_problems(
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+
+
+rag_context_service = RAGContextService(search_service=search_service)
+
+
+@app.get("/api/search/context", response_model=RAGContextResponse)
+def get_search_rag_context(
+    q: str = Query(..., description="Natural language problem query"),
+    top_k: int = Query(default=5, ge=1, le=20, description="Top K results to return (1-20)"),
+    db: Session = Depends(get_db),
+):
+    """Retrieve top-K matching problems with their associated solutions structured for RAG context."""
+    if not q or not q.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Query text cannot be empty or contain only whitespace.",
+        )
+    try:
+        return rag_context_service.build_context(db=db, query=q, top_k=top_k)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while building RAG context.",
+        )
+
 
