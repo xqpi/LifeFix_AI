@@ -198,11 +198,25 @@ This document tracks the technical implementation progress for the LifeFix proje
     - Both Gemini AI solutions and deterministic RAG fallback solutions are persisted as standard `ProblemAttempt` records.
     - Returns `attempt_id` in the API response strictly matching the PostgreSQL `problem_attempts.id`.
 
+- Implemented User Feedback for Problem Attempts (Step 8.3):
+  - Defined request and response schemas in `backend/app/schemas/solver.py`:
+    - `AttemptFeedbackRequest`: Requires `was_successful: bool`, optional `rating` (1–5), and optional `comment` (whitespace stripped to None).
+    - `AttemptFeedbackResponse`: Returns `attempt_id`, `was_successful`, `feedback_recorded: bool`, and bilingual user-facing `message`.
+  - Implemented `AttemptService` in `backend/app/services/attempt_service.py`:
+    - Enforces ownership: verifies attempt belongs to the development guest user (`guest@lifefix.local`), returning 404 on mismatch with zero information leakage.
+    - Updates `ProblemAttempt.was_successful` to the submitted boolean.
+    - Idempotently creates or updates the associated `Feedback` record when detailed feedback (rating or comment) is provided, preventing uncontrolled duplicate rows.
+    - Avoids creating unnecessary `Feedback` rows when only Yes/No feedback is submitted (`feedback_recorded = False`).
+    - Transaction safety: wraps operations in a single atomic transaction with rollback on failure.
+  - Added endpoint `POST /api/attempts/{attempt_id}/feedback` in `backend/app/main.py`.
+  - Created and applied Alembic migration `ff4b099528df` (`make_feedback_rating_nullable`) making `Feedback.rating` nullable to support comment-only feedback without fabricating ratings.
+  - Solution refinement is intentionally deferred to Step 8.4.
+
 ---
 
 ## Current Status
 
-- Steps 1–8.2 are completed.
+- Steps 1–8.3 are completed.
 - PostgreSQL database contains the 384-dimensional vector column and active HNSW cosine index.
 - The `EmbeddingService` generates normalized multilingual E5 embeddings.
 - A sample development catalog of 18 problems across 7 categories is seeded with stored embeddings.
@@ -211,4 +225,5 @@ This document tracks the technical implementation progress for the LifeFix proje
 - RAG context preparation is implemented and operational via `RAGContextService` and `GET /api/search/context`.
 - AI problem-solving endpoint `POST /api/solve` is implemented and operational via `ProblemSolverService`, `LLMService`, and `google-genai` (targeting `gemini-2.5-flash`), with deterministic RAG fallback on network/provider failure.
 - Every successful solve request persists an initial `ProblemAttempt` in PostgreSQL linked to the development guest user, returning the database `attempt_id`.
+- User feedback endpoint `POST /api/attempts/{attempt_id}/feedback` updates `ProblemAttempt.was_successful` and idempotently records rating and comments in `feedbacks`.
 - No frontend integration or authentication has been implemented yet.

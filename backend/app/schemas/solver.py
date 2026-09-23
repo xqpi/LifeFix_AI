@@ -89,3 +89,28 @@ class SolveProblemRequest(BaseModel):
             return None
         cleaned = v.strip()
         return cleaned if cleaned else None
+
+
+class AttemptFeedbackRequest(BaseModel):
+    """User feedback payload for an existing ProblemAttempt."""
+
+    was_successful: bool = Field(..., description="Whether the recommended solution solved the user's problem")
+    rating: int | None = Field(default=None, ge=1, le=5, description="Optional satisfaction rating between 1 and 5")
+    comment: str | None = Field(default=None, description="Optional qualitative feedback or explanation")
+
+    @field_validator("comment")
+    @classmethod
+    def validate_comment(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        cleaned = v.strip()
+        return cleaned if cleaned else None
+
+
+class AttemptFeedbackResponse(BaseModel):
+    """Response returned upon successfully recording feedback for a ProblemAttempt."""
+
+    attempt_id: str = Field(description="UUID of the problem attempt")
+    was_successful: bool = Field(description="Whether the attempt successfully solved the problem")
+    feedback_recorded: bool = Field(description="Whether detailed feedback (rating/comment) was recorded")
+    message: str = Field(description="User-facing confirmation message")

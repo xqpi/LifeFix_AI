@@ -1,3 +1,4 @@
+import uuid
 from fastapi import Depends, FastAPI, HTTPException, Query  # pyright: ignore[reportMissingImports]
 from fastapi.middleware.cors import CORSMiddleware  # pyright: ignore[reportMissingImports]
 from sqlalchemy import text  # pyright: ignore[reportMissingImports]
@@ -6,7 +7,13 @@ from sqlalchemy.orm import Session  # pyright: ignore[reportMissingImports]
 from app.db.database import get_db
 from app.schemas.rag import RAGContextResponse
 from app.schemas.search import SearchResponse
-from app.schemas.solver import LifeFixSolutionResponse, SolveProblemRequest
+from app.schemas.solver import (
+    AttemptFeedbackRequest,
+    AttemptFeedbackResponse,
+    LifeFixSolutionResponse,
+    SolveProblemRequest,
+)
+from app.services.attempt_service import AttemptService
 from app.services.problem_solver_service import ProblemSolverService
 from app.services.rag_context_service import RAGContextService
 from app.services.semantic_search_service import SemanticSearchService
@@ -111,6 +118,7 @@ def get_search_rag_context(
 
 
 problem_solver_service = ProblemSolverService(rag_context_service=rag_context_service)
+attempt_service = AttemptService()
 
 
 @app.post("/api/solve", response_model=LifeFixSolutionResponse)
@@ -127,4 +135,38 @@ def solve_problem(
         raise HTTPException(
             status_code=500,
             detail="An error occurred while solving the problem.",
+        )
+
+
+@app.post(
+    "/api/attempts/{attempt_id}/feedback",
+    response_model=AttemptFeedbackResponse,
+    status_code=200,
+)
+def record_attempt_feedback(
+    attempt_id: uuid.UUID,
+    payload: AttemptFeedbackRequest,
+    db: Session = Depends(get_db),
+):
+    """Record user feedback (success status, optional rating and comment) for a problem attempt."""
+    try:
+        response = attempt_service.record_feedback(
+            db=db,
+            attempt_id=attempt_id,
+            request=payload,
+        )
+        if response is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Problem attempt not found.",
+            )
+        return response
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while recording feedback.",
         )

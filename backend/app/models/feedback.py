@@ -35,7 +35,7 @@ class Feedback(Base):
         nullable=False,
         index=True,
     )
-    rating: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    rating: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
