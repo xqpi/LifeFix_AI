@@ -2,7 +2,18 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, Uuid, func
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    Uuid,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
@@ -19,6 +30,14 @@ if TYPE_CHECKING:
 
 class Problem(Base):
     __tablename__ = "problems"
+    __table_args__ = (
+        Index(
+            "ix_problems_embedding_hnsw",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         Uuid, primary_key=True, default=uuid.uuid4
@@ -39,6 +58,9 @@ class Problem(Base):
     )
     is_verified: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
+    )
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(384), nullable=True
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(
         Uuid,

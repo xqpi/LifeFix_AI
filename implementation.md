@@ -71,7 +71,37 @@ This document tracks the technical implementation progress for the LifeFix proje
 
 ---
 
+## Step 6: pgvector and Multilingual Embeddings Setup
+
+- Installed and configured the official `pgvector` Python package (`pgvector==0.5.0`) with SQLAlchemy 2.0 integration.
+- Updated `backend/app/models/problem.py`:
+  - Added nullable `embedding` column of type `Vector(384)` to the `Problem` model without server default.
+  - Defined explicit HNSW vector index `ix_problems_embedding_hnsw` on `Problem.embedding` using `vector_cosine_ops` in `__table_args__`.
+- Created and applied Alembic database migrations:
+  - Revision `f2cd3c36eea4` (`f2cd3c36eea4_add_embedding_column_to_problems.py`): Added the `embedding` vector column to `problems`.
+  - Revision `d9e7095a0c31` (`d9e7095a0c31_add_hnsw_index_to_problems_embedding.py`): Created the HNSW cosine similarity index (`ix_problems_embedding_hnsw`) on `problems.embedding`.
+- Verified database state in PostgreSQL and Alembic:
+  - Confirmed `alembic current` and `alembic heads` report `d9e7095a0c31 (head)`.
+  - Confirmed `alembic check` passes cleanly with `No new upgrade operations detected.`
+  - Verified in PostgreSQL system catalogs that `problems.embedding` exists as `vector(384)` (nullable, no default) and `ix_problems_embedding_hnsw` is an active HNSW index utilizing `vector_cosine_ops`.
+- Prepared the embedding environment and selected `intfloat/multilingual-e5-small`:
+  - Installed `sentence-transformers==6.1.0` and pinned it in `backend/requirements.txt`.
+  - Verified local loading of `intfloat/multilingual-e5-small` producing 384-dimensional dense vectors.
+- Implemented `EmbeddingService` under `backend/app/services/`:
+  - Created `backend/app/services/__init__.py` and `backend/app/services/embedding_service.py`.
+  - Process-level singleton pattern ensuring the transformer model is loaded once per process.
+  - Implemented separate `embed_query(text)` and `embed_passage(text)` methods following the E5 asymmetric prefix convention (`query: ` vs `passage: `).
+  - Enforced L2 normalization (`normalize_embeddings=True`) for unit vectors where cosine similarity equals the dot product.
+  - Implemented input validation rejecting empty or whitespace-only strings.
+- Verified embedding generation and multilingual semantic similarity:
+  - Validated English and Arabic queries and passages generating 384-dimensional normalized vectors (L2 norm = 1.0, no NaN/inf values).
+  - Tested semantic similarity with an Arabic/English equivalent pair (`اللابتوب عندي بطيء عندما أفتح برامج كثيرة` vs `My laptop becomes slow when I open many applications.`), achieving high cosine similarity (~0.9037) compared to unrelated text (~0.7863).
+
+---
+
 ## Current Status
 
-- Steps 1–5 are completed.
-- The next major step is integrating the pgvector embedding field and beginning the semantic-search/AI retrieval layer.
+- Steps 1–6 are completed.
+- Database contains the vector column and HNSW index.
+- The embedding service is ready for semantic search, problem indexing, and retrieval.
+- No database problems have been populated with embeddings yet.
