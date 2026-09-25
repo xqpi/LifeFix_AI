@@ -35,6 +35,32 @@ if missing_vars:
 # Build SQLAlchemy connection URL using psycopg 3
 DATABASE_URL = f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}"
 
+# JWT Authentication configuration
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
+
+
+def get_jwt_secret_key() -> str:
+    """Return the configured JWT_SECRET_KEY or raise ValueError if missing, empty, or too short.
+
+    Enforces that JWT_SECRET_KEY is defined in the environment, non-empty, and at least 32 bytes long,
+    with no fallback or hardcoded default.
+    """
+    key = os.getenv("JWT_SECRET_KEY") or JWT_SECRET_KEY
+    if not key or not key.strip():
+        raise ValueError(
+            "JWT_SECRET_KEY is not set or empty. "
+            f"Please ensure JWT_SECRET_KEY is defined in: {ENV_PATH}"
+        )
+    clean_key = key.strip()
+    if len(clean_key.encode("utf-8")) < 32:
+        raise ValueError(
+            "JWT_SECRET_KEY must be at least 32 bytes long for secure HMAC-SHA256 signing."
+        )
+    return clean_key
+
+
 # Gemini LLM configuration
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 

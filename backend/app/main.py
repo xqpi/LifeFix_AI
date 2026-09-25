@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware  # pyright: ignore[reportMiss
 from sqlalchemy import text  # pyright: ignore[reportMissingImports]
 from sqlalchemy.orm import Session  # pyright: ignore[reportMissingImports]
 
+from app.api.auth import router as auth_router
 from app.db.database import get_db
 from app.schemas.rag import RAGContextResponse
 from app.schemas.search import SearchResponse
@@ -41,6 +42,8 @@ app.add_middleware(
 
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
 
 
 @app.get("/")
