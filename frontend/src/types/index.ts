@@ -21,3 +21,18 @@ export interface ComponentBaseProps {
   className?: string;
   children?: ReactNode;
 }
+
+/**
+ * Suggested Problem Categories
+ */
+export type ProblemCategory =
+  | "Technology"
+  | "Home & Living"
+  | "Productivity"
+  | "Cooking"
+  | "Everyday Fixes";
+
+export interface CategoryOption {
+  id: ProblemCategory;
+  label: string;
+}
