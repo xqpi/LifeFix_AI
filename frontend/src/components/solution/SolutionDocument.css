@@ -1,0 +1,531 @@
+/* ==========================================================================
+   Solution Document Experience
+   Design System: DESIGN.md Section 11 & Section 20
+   ========================================================================== */
+
+.lifefix-solution-doc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+  transition: box-shadow var(--transition-normal);
+}
+
+@media (max-width: 639px) {
+  .lifefix-solution-doc {
+    padding: var(--space-4);
+    gap: var(--space-5);
+  }
+}
+
+/* RTL Support */
+.lifefix-solution-doc--rtl {
+  font-family: var(--font-arabic), var(--font-sans);
+  text-align: right;
+  direction: rtl;
+}
+
+/* --------------------------------------------------------------------------
+   Header / Problem Context Breadcrumb
+   -------------------------------------------------------------------------- */
+
+.lifefix-solution-doc__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+  flex-wrap: wrap;
+}
+
+.lifefix-solution-doc__problem-badge {
+  flex: 1 1 280px;
+  background-color: var(--color-background-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+.lifefix-solution-doc__badge-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.lifefix-solution-doc__problem-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.lifefix-solution-doc__edit-btn {
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Body Container
+   -------------------------------------------------------------------------- */
+
+.lifefix-solution-doc__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ==========================================================================
+   1. Understanding Banner (DESIGN.md Section 11A)
+   ========================================================================== */
+
+.lifefix-understanding-banner {
+  background-color: var(--color-background-subtle);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lifefix-understanding-banner--rtl {
+  border-left: 1px solid var(--color-border);
+  border-right: 3px solid var(--color-primary);
+}
+
+.lifefix-understanding-banner__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+}
+
+.lifefix-understanding-banner__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lifefix-understanding-banner__title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.lifefix-understanding-banner__text {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  margin: 0;
+  word-break: break-word;
+}
+
+/* ==========================================================================
+   2. Possible Causes Module (DESIGN.md Section 11B)
+   ========================================================================== */
+
+.lifefix-causes-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lifefix-causes-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.lifefix-causes-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lifefix-cause-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.lifefix-cause-item__bullet {
+  color: var(--color-primary);
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.lifefix-cause-item__text {
+  flex: 1;
+  word-break: break-word;
+}
+
+/* ==========================================================================
+   3. Action Steps (DESIGN.md Section 11C)
+   ========================================================================== */
+
+.lifefix-solution-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lifefix-solution-steps__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.lifefix-steps-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lifefix-step-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.lifefix-step-card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.lifefix-step-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.lifefix-step-card__badge {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.lifefix-step-card__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+@media (min-width: 640px) {
+  .lifefix-step-card__title-group {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.lifefix-step-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.lifefix-step-card__tags {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.lifefix-step-card__time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lifefix-step-card__instruction {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding-left: calc(28px + var(--space-3));
+}
+
+.lifefix-solution-steps--rtl .lifefix-step-card__instruction {
+  padding-left: 0;
+  padding-right: calc(28px + var(--space-3));
+}
+
+@media (max-width: 639px) {
+  .lifefix-step-card__instruction {
+    padding-left: 0;
+  }
+  .lifefix-solution-steps--rtl .lifefix-step-card__instruction {
+    padding-right: 0;
+  }
+}
+
+/* ==========================================================================
+   4. Explanations Module
+   ========================================================================== */
+
+.lifefix-explanations-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background-color: var(--color-background-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.lifefix-explanations-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.lifefix-explanations-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lifefix-explanation-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.lifefix-explanation-item__check {
+  color: var(--color-success);
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   5. Warnings & Notes Callout (DESIGN.md Section 11D)
+   ========================================================================== */
+
+.lifefix-warning-callout {
+  background-color: var(--color-warning-soft);
+  border: 1px solid var(--color-warning-border);
+  border-left: 3px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.lifefix-warning-callout--rtl {
+  border-left: 1px solid var(--color-warning-border);
+  border-right: 3px solid var(--color-warning);
+}
+
+.lifefix-warning-callout__icon {
+  color: var(--color-warning);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.lifefix-warning-callout__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.lifefix-warning-callout__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.lifefix-warning-callout__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.lifefix-warning-callout__item {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+/* ==========================================================================
+   6. Clarification / Follow-up Question Callout
+   ========================================================================== */
+
+.lifefix-followup-callout {
+  background-color: var(--color-primary-soft);
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.lifefix-followup-callout__icon {
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.lifefix-followup-callout__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.lifefix-followup-callout__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.lifefix-followup-callout__text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* ==========================================================================
+   7. Source Knowledge Attribution (DESIGN.md Section 11E)
+   ========================================================================== */
+
+.lifefix-source-cases {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.lifefix-source-cases__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.lifefix-source-cases__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-info);
+}
+
+.lifefix-source-cases__title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.lifefix-source-cases__list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.lifefix-source-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--color-info-soft);
+  color: var(--color-info);
+  border: 1px solid var(--color-info-border);
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  max-width: 100%;
+}
+
+.lifefix-source-pill__id {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.lifefix-source-pill__title {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+@media (max-width: 639px) {
+  .lifefix-source-pill__title {
+    max-width: 180px;
+  }
+}
