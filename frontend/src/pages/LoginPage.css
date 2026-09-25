@@ -1,0 +1,189 @@
+.lifefix-auth-page {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-12);
+  display: flex;
+  justify-content: center;
+}
+
+.lifefix-auth-container {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.lifefix-auth-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.lifefix-auth-logo-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-primary-border);
+  margin-bottom: var(--space-2);
+}
+
+.lifefix-auth-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.lifefix-auth-subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.lifefix-auth-card {
+  padding: var(--space-8) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+@media (min-width: 640px) {
+  .lifefix-auth-card {
+    padding: var(--space-8);
+  }
+}
+
+.lifefix-auth-error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-error-soft);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-md);
+  color: var(--color-error);
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: var(--space-5);
+}
+
+.lifefix-auth-error-banner svg {
+  flex-shrink: 0;
+}
+
+.lifefix-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.lifefix-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lifefix-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.lifefix-form-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.lifefix-form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.lifefix-form-input:disabled {
+  background-color: var(--color-background-subtle);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.lifefix-auth-submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: var(--space-2);
+}
+
+.lifefix-auth-footer-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-6) 0 var(--space-5);
+}
+
+.lifefix-auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+.lifefix-auth-divider-text {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lifefix-auth-secondary-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.lifefix-auth-switch {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.lifefix-auth-link {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lifefix-auth-link:hover {
+  text-decoration: underline;
+  color: var(--color-primary-hover);
+}
+
+.lifefix-auth-guest-option {
+  margin-top: var(--space-1);
+}
+
+.lifefix-auth-guest-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.lifefix-auth-guest-link:hover {
+  color: var(--color-text-primary);
+}

@@ -105,10 +105,59 @@ export interface AttemptFeedbackResponse {
   message: string;
 }
 
-/**
- * User request payload for refining an unsuccessful problem attempt.
- * Matches RefineProblemRequest from backend/app/schemas/solver.py
- */
 export interface RefineProblemRequest {
   additional_information: string;
+}
+
+/**
+ * User account model returned by backend /api/auth endpoints.
+ * Matches backend/app/schemas/auth.py UserResponse.
+ */
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  created_at: string;
+}
+
+/**
+ * Authentication response with access token returned by POST /api/auth/login.
+ * Matches backend/app/schemas/auth.py TokenResponse.
+ */
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
+/**
+ * Registration request payload sent to POST /api/auth/register.
+ * Matches backend/app/schemas/auth.py UserRegisterRequest.
+ */
+export interface UserRegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * Login request payload sent to POST /api/auth/login.
+ * Matches backend/app/schemas/auth.py UserLoginRequest.
+ */
+export interface UserLoginRequest {
+  email: string;
+  password: string;
+}
+
+/**
+ * Shape of the frontend authentication context state and handlers.
+ */
+export interface AuthContextValue {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (credentials: UserLoginRequest) => Promise<void>;
+  register: (payload: UserRegisterRequest) => Promise<void>;
+  logout: () => void;
 }
