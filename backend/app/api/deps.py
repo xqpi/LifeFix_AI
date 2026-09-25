@@ -4,7 +4,7 @@ import logging
 import uuid
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -88,17 +88,25 @@ def get_current_user(
 
 
 def get_optional_current_user(
+    request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_bearer_scheme),
     db: Session = Depends(get_db),
 ) -> Optional[User]:
     """Optionally resolve authenticated user if Bearer header is present.
 
-    Returns None if no token was provided, or if the token is invalid/expired.
+    Returns None if no Authorization header was provided (unauthenticated).
+    If an Authorization header is provided, it validates the token and raises
+    HTTPException 401 if invalid or expired, preventing silent guest fallback.
     """
-    if credentials is None:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
         return None
 
-    try:
-        return get_current_user(credentials=credentials, db=db)
-    except HTTPException:
-        return None
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return get_current_user(credentials=credentials, db=db)

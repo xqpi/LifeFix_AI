@@ -291,6 +291,7 @@ class ProblemSolverService:
         rag_context: RAGContextResponse,
         response: LifeFixSolutionResponse,
         parent_attempt_id: uuid.UUID | None = None,
+        user: Optional[User] = None,
     ) -> LifeFixSolutionResponse:
         """Persist a ProblemAttempt to PostgreSQL with transaction safety.
 
@@ -300,6 +301,7 @@ class ProblemSolverService:
             rag_context: The retrieved RAG context.
             response: The generated solution response (from LLM or fallback).
             parent_attempt_id: Optional UUID of the parent ProblemAttempt if this is a refinement.
+            user: Optional authenticated User. If None, falls back to development guest user.
 
         Returns:
             LifeFixSolutionResponse: The solution response containing the persisted attempt_id.
@@ -308,7 +310,7 @@ class ProblemSolverService:
             RuntimeError: If database persistence or guest user lookup fails.
         """
         try:
-            guest_user = self._get_guest_user(db)
+            effective_user = user if user is not None else self._get_guest_user(db)
 
             # Determine best matching retrieved Problem ID if available
             original_problem_id: uuid.UUID | None = None
@@ -328,7 +330,7 @@ class ProblemSolverService:
 
             attempt = ProblemAttempt(
                 id=attempt_id,
-                user_id=guest_user.id,
+                user_id=effective_user.id,
                 original_problem_id=original_problem_id,
                 parent_attempt_id=parent_attempt_id,
                 user_message=request.problem_description.strip(),
@@ -355,6 +357,7 @@ class ProblemSolverService:
         request: SolveProblemRequest,
         top_k: int = DEFAULT_TOP_K,
         parent_attempt_id: uuid.UUID | None = None,
+        user: Optional[User] = None,
     ) -> LifeFixSolutionResponse:
         """Execute the full problem solving pipeline: RAG retrieval -> LLM generation -> fallback -> persistence.
 
@@ -363,6 +366,7 @@ class ProblemSolverService:
             request: Validated user problem request.
             top_k: Number of similar cases to retrieve for RAG context.
             parent_attempt_id: Optional UUID of the parent ProblemAttempt for refinements.
+            user: Optional authenticated User. If None, falls back to development guest user.
 
         Returns:
             LifeFixSolutionResponse: Structured solution response with persisted attempt_id.
@@ -409,4 +413,5 @@ class ProblemSolverService:
             rag_context=rag_context,
             response=response,
             parent_attempt_id=parent_attempt_id,
+            user=user,
         )

@@ -2,6 +2,7 @@
 
 import logging
 import uuid
+from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -48,36 +49,45 @@ class AttemptService:
             )
         return guest_user
 
+    def _resolve_effective_user(self, db: Session, user: Optional[User] = None) -> User:
+        """Resolve the effective user: return user if authenticated, else development guest user."""
+        if user is not None:
+            return user
+        return self._get_guest_user(db)
+
     def record_feedback(
         self,
         db: Session,
         attempt_id: uuid.UUID,
         request: AttemptFeedbackRequest,
+        user: Optional[User] = None,
     ) -> AttemptFeedbackResponse | None:
         """Record user feedback for an existing problem attempt.
 
         Updates the attempt's was_successful status and optionally creates/updates
-        a detailed Feedback record if a rating or comment is provided.
+        a detailed Feedback record if a rating or comment is provided. Ownership
+        is strictly enforced based on the effective user (authenticated user or guest).
 
         Args:
             db: Active SQLAlchemy database session.
             attempt_id: Valid UUID of the target ProblemAttempt.
             request: Validated AttemptFeedbackRequest.
+            user: Optional authenticated User. If None, falls back to development guest user.
 
         Returns:
             AttemptFeedbackResponse | None: The feedback response if the attempt was found
-            and belongs to the active guest user; None otherwise (triggers 404).
+            and belongs to the effective user; None otherwise (triggers 404).
 
         Raises:
             RuntimeError: If database persistence fails or guest user is missing.
         """
-        guest_user = self._get_guest_user(db)
+        effective_user = self._resolve_effective_user(db, user)
 
-        # 1. Enforce ownership: find attempt belonging to the guest user
+        # 1. Enforce ownership: find attempt belonging to the effective user
         attempt = db.scalars(
             select(ProblemAttempt).where(
                 ProblemAttempt.id == attempt_id,
-                ProblemAttempt.user_id == guest_user.id,
+                ProblemAttempt.user_id == effective_user.id,
             )
         ).first()
 
@@ -99,7 +109,7 @@ class AttemptService:
                 existing_feedback = db.scalars(
                     select(Feedback).where(
                         Feedback.attempt_id == attempt.id,
-                        Feedback.user_id == guest_user.id,
+                        Feedback.user_id == effective_user.id,
                     )
                 ).first()
 
@@ -108,7 +118,7 @@ class AttemptService:
                     existing_feedback.comment = request.comment
                 else:
                     new_feedback = Feedback(
-                        user_id=guest_user.id,
+                        user_id=effective_user.id,
                         attempt_id=attempt.id,
                         rating=rating_value,
                         comment=request.comment,
@@ -161,35 +171,37 @@ class AttemptService:
         attempt_id: uuid.UUID,
         request: RefineProblemRequest,
         solver_service: ProblemSolverService,
+        user: Optional[User] = None,
     ) -> LifeFixSolutionResponse | None:
         """Refine an unsuccessful problem attempt by appending additional context.
 
-        Validates parent attempt existence, guest ownership, and that the parent
-        attempt was marked unsuccessful. Combines the original context and new
-        clarifications, then runs the full solve pipeline to persist a new child
-        ProblemAttempt linked to the parent.
+        Validates parent attempt existence, ownership by effective user, and that
+        the parent attempt was marked unsuccessful. Combines the original context
+        and new clarifications, then runs the full solve pipeline to persist a new
+        child ProblemAttempt linked to the parent.
 
         Args:
             db: Active SQLAlchemy database session.
             attempt_id: UUID of the parent ProblemAttempt.
             request: Validated RefineProblemRequest containing additional_information.
             solver_service: Injected ProblemSolverService instance.
+            user: Optional authenticated User. If None, falls back to development guest user.
 
         Returns:
             LifeFixSolutionResponse | None: The new child attempt solution response,
-            or None if the parent attempt is not found or not owned by guest (triggers 404).
+            or None if the parent attempt is not found or not owned by effective user (triggers 404).
 
         Raises:
             ValueError: If the parent attempt was not marked unsuccessful (status is None or True).
             RuntimeError: If database persistence or guest user lookup fails.
         """
-        guest_user = self._get_guest_user(db)
+        effective_user = self._resolve_effective_user(db, user)
 
         # 1. Enforce ownership and lookup parent attempt
         attempt = db.scalars(
             select(ProblemAttempt).where(
                 ProblemAttempt.id == attempt_id,
-                ProblemAttempt.user_id == guest_user.id,
+                ProblemAttempt.user_id == effective_user.id,
             )
         ).first()
 
@@ -215,7 +227,7 @@ class AttemptService:
                 f"Additional information:\n{clean_additional_info}"
             )
 
-        # 4. Execute the solve pipeline with parent link
+        # 4. Execute the solve pipeline with parent link and effective user
         solve_request = SolveProblemRequest(
             problem_description=combined_query,
         )
@@ -224,4 +236,5 @@ class AttemptService:
             db=db,
             request=solve_request,
             parent_attempt_id=attempt.id,
+            user=effective_user,
         )

@@ -1,11 +1,14 @@
 import uuid
+from typing import Optional
 from fastapi import Depends, FastAPI, HTTPException, Query  # pyright: ignore[reportMissingImports]
 from fastapi.middleware.cors import CORSMiddleware  # pyright: ignore[reportMissingImports]
 from sqlalchemy import text  # pyright: ignore[reportMissingImports]
 from sqlalchemy.orm import Session  # pyright: ignore[reportMissingImports]
 
 from app.api.auth import router as auth_router
+from app.api.deps import get_optional_current_user
 from app.db.database import get_db
+from app.models.user import User
 from app.schemas.rag import RAGContextResponse
 from app.schemas.search import SearchResponse
 from app.schemas.solver import (
@@ -129,10 +132,15 @@ attempt_service = AttemptService()
 def solve_problem(
     payload: SolveProblemRequest,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
     """Generate a structured, grounded LifeFix solution for a user's problem."""
     try:
-        return problem_solver_service.solve(db=db, request=payload)
+        return problem_solver_service.solve(
+            db=db,
+            request=payload,
+            user=current_user,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception:
@@ -151,6 +159,7 @@ def record_attempt_feedback(
     attempt_id: uuid.UUID,
     payload: AttemptFeedbackRequest,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
     """Record user feedback (success status, optional rating and comment) for a problem attempt."""
     try:
@@ -158,6 +167,7 @@ def record_attempt_feedback(
             db=db,
             attempt_id=attempt_id,
             request=payload,
+            user=current_user,
         )
         if response is None:
             raise HTTPException(
@@ -185,6 +195,7 @@ def refine_problem_attempt(
     attempt_id: uuid.UUID,
     payload: RefineProblemRequest,
     db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
     """Refine an unsuccessful problem attempt with additional context, producing a new child attempt."""
     try:
@@ -193,6 +204,7 @@ def refine_problem_attempt(
             attempt_id=attempt_id,
             request=payload,
             solver_service=problem_solver_service,
+            user=current_user,
         )
         if response is None:
             raise HTTPException(
