@@ -5,8 +5,9 @@
 
 import type { ReactNode } from "react";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "success";
 export type ButtonSize = "sm" | "md" | "lg";
+
 
 export type BadgeVariant =
   | "default"
@@ -81,4 +82,25 @@ export interface LifeFixSolutionResponse {
 export interface SolveProblemRequest {
   problem_description: string;
   category_hint: string | null;
+}
+
+/**
+ * User feedback payload for an existing ProblemAttempt.
+ * Matches AttemptFeedbackRequest from backend/app/schemas/solver.py
+ */
+export interface AttemptFeedbackRequest {
+  was_successful: boolean;
+  rating?: number | null;
+  comment?: string | null;
+}
+
+/**
+ * Response returned upon successfully recording feedback for a ProblemAttempt.
+ * Matches AttemptFeedbackResponse from backend/app/schemas/solver.py
+ */
+export interface AttemptFeedbackResponse {
+  attempt_id: string;
+  was_successful: boolean;
+  feedback_recorded: boolean;
+  message: string;
 }

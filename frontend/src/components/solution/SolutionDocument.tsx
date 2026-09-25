@@ -4,6 +4,7 @@ import CausesSection from "./CausesSection";
 import SolutionSteps from "./SolutionSteps";
 import WarningCallout from "./WarningCallout";
 import SourceCases from "./SourceCases";
+import FeedbackSection from "./FeedbackSection";
 import Button from "../ui/Button";
 import "./SolutionDocument.css";
 
@@ -161,9 +162,15 @@ export function SolutionDocument({
         {solution.source_cases && solution.source_cases.length > 0 && (
           <SourceCases sources={solution.source_cases} isRtl={isRtl} />
         )}
+
+        {/* 8. Solution Feedback Loop (DESIGN.md Section 12) */}
+        {solution.attempt_id && (
+          <FeedbackSection attemptId={solution.attempt_id} isRtl={isRtl} />
+        )}
       </div>
     </article>
   );
 }
+
 
 export default SolutionDocument;

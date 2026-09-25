@@ -1,0 +1,80 @@
+/* ==========================================================================
+   Star Rating Control
+   Design System: DESIGN.md Section 12 & Section 17
+   ========================================================================== */
+
+.lifefix-star-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.lifefix-star-rating__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.lifefix-star-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-border-hover);
+  transition:
+    color var(--transition-fast),
+    transform var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.lifefix-star-btn:hover:not(:disabled) {
+  color: #F59E0B; /* Warm Amber Star hover */
+  background-color: var(--color-background-subtle);
+  transform: scale(1.12);
+}
+
+.lifefix-star-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.lifefix-star-btn--filled {
+  color: #F59E0B; /* Warm Amber Star selected */
+}
+
+.lifefix-star-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  background-color: var(--color-primary-soft);
+}
+
+.lifefix-star-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.lifefix-star-icon {
+  pointer-events: none;
+}
+
+.lifefix-star-rating__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .lifefix-star-btn {
+    transition: none;
+  }
+  .lifefix-star-btn:hover:not(:disabled) {
+    transform: none;
+  }
+}
