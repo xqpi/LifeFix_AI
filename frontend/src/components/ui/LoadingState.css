@@ -14,6 +14,13 @@
   box-shadow: var(--shadow-sm);
 }
 
+.lifefix-loading-state--rtl {
+  font-family: var(--font-arabic), var(--font-sans);
+  direction: rtl;
+  text-align: right;
+}
+
+
 .lifefix-loading-state__header {
   display: flex;
   align-items: center;

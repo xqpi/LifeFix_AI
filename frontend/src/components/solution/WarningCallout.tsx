@@ -9,7 +9,8 @@ export function WarningCallout({
   isRtl = false,
   className = "",
 }: WarningCalloutProps) {
-  if (!warnings || warnings.length === 0) {
+  const validWarnings = warnings ? warnings.filter((w) => w && w.trim().length > 0) : [];
+  if (validWarnings.length === 0) {
     return null;
   }
 
@@ -44,7 +45,7 @@ export function WarningCallout({
           {title}
         </h4>
         <ul className="lifefix-warning-callout__list">
-          {warnings.map((warning, index) => (
+          {validWarnings.map((warning, index) => (
             <li key={index} className="lifefix-warning-callout__item">
               {warning}
             </li>
@@ -54,5 +55,6 @@ export function WarningCallout({
     </aside>
   );
 }
+
 
 export default WarningCallout;

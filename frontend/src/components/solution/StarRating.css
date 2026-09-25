@@ -34,6 +34,13 @@
     background-color var(--transition-fast);
 }
 
+@media (max-width: 639px) {
+  .lifefix-star-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
 .lifefix-star-btn:hover:not(:disabled) {
   color: #F59E0B; /* Warm Amber Star hover */
   background-color: var(--color-background-subtle);

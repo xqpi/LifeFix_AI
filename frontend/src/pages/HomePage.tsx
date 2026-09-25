@@ -161,6 +161,20 @@ export function HomePage() {
     });
   };
 
+  const handleNewProblem = () => {
+    setProblemText("");
+    setSelectedCategory(null);
+    setSolution(null);
+    setSubmittedProblem("");
+    setAttemptNumber(1);
+    setAttemptId(null);
+    setErrorMessage(null);
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 50);
+  };
+
   return (
     <PageContainer>
       {/* Screen Reader Live Region for Dynamic Announcements */}
@@ -345,7 +359,9 @@ export function HomePage() {
 
         {/* Loading State */}
         {isLoading && (
-          <LoadingState message="Thinking through your problem..." />
+          <LoadingState
+            isRtl={/[\u0600-\u06FF]/.test(problemText)}
+          />
         )}
 
         {/* Structured Solution Document Display */}
@@ -357,6 +373,7 @@ export function HomePage() {
               attemptNumber={attemptNumber}
               onSolutionRefined={handleSolutionRefined}
               onEditProblem={handleEditProblem}
+              onNewProblem={handleNewProblem}
             />
           </div>
         )}

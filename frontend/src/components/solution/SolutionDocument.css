@@ -83,6 +83,15 @@
   word-break: break-word;
 }
 
+.lifefix-solution-doc__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.lifefix-solution-doc__action-btn,
 .lifefix-solution-doc__edit-btn {
   flex-shrink: 0;
 }

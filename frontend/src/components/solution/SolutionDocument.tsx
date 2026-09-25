@@ -15,6 +15,7 @@ export interface SolutionDocumentProps {
   attemptNumber?: number;
   onSolutionRefined?: (newSolution: LifeFixSolutionResponse) => void;
   onEditProblem?: () => void;
+  onNewProblem?: () => void;
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export function SolutionDocument({
   attemptNumber = 1,
   onSolutionRefined,
   onEditProblem,
+  onNewProblem,
   className = "",
 }: SolutionDocumentProps) {
   // Detect Arabic content to set appropriate direction and typography
@@ -31,6 +33,10 @@ export function SolutionDocument({
     solution.recommended_steps[0]?.instruction ?? ""
   }`;
   const isRtl = /[\u0600-\u06FF]/.test(sampleText);
+
+  const validExplanations = (solution.explanations || []).filter(
+    (exp) => typeof exp === "string" && exp.trim().length > 0
+  );
 
   return (
     <article
@@ -76,33 +82,63 @@ export function SolutionDocument({
             <p className="lifefix-solution-doc__problem-text">{originalProblem}</p>
           </div>
 
-
-          {onEditProblem && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onEditProblem}
-              className="lifefix-solution-doc__edit-btn"
-              leftIcon={
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+          {(onEditProblem || onNewProblem) && (
+            <div className="lifefix-solution-doc__header-actions">
+              {onEditProblem && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onEditProblem}
+                  className="lifefix-solution-doc__action-btn"
+                  leftIcon={
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                  }
                 >
-                  <path d="M12 20h9" />
-                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                </svg>
-              }
-            >
-              {isRtl ? "تعديل المشكلة" : "Edit problem"}
-            </Button>
+                  {isRtl ? "تعديل المشكلة" : "Edit problem"}
+                </Button>
+              )}
+              {onNewProblem && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onNewProblem}
+                  className="lifefix-solution-doc__action-btn"
+                  leftIcon={
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  }
+                >
+                  {isRtl ? "مشكلة جديدة" : "New problem"}
+                </Button>
+              )}
+            </div>
           )}
         </header>
       )}
@@ -124,7 +160,7 @@ export function SolutionDocument({
         <SolutionSteps steps={solution.recommended_steps} isRtl={isRtl} />
 
         {/* 4. Why This Works / Explanations Section */}
-        {solution.explanations && solution.explanations.length > 0 && (
+        {validExplanations.length > 0 && (
           <section
             className="lifefix-explanations-section"
             aria-labelledby="explanations-heading"
@@ -136,7 +172,7 @@ export function SolutionDocument({
               {isRtl ? "لماذا يساعد هذا النهج؟" : "Why this approach helps"}
             </h3>
             <ul className="lifefix-explanations-list">
-              {solution.explanations.map((exp, idx) => (
+              {validExplanations.map((exp, idx) => (
                 <li key={idx} className="lifefix-explanation-item">
                   <span
                     className="lifefix-explanation-item__check"
@@ -157,7 +193,7 @@ export function SolutionDocument({
         )}
 
         {/* 6. Clarification / Follow-up Question if provided */}
-        {solution.follow_up_question && (
+        {solution.follow_up_question && solution.follow_up_question.trim().length > 0 && (
           <section
             className="lifefix-followup-callout"
             aria-labelledby="followup-heading"
@@ -183,7 +219,7 @@ export function SolutionDocument({
                 {isRtl ? "سؤال للمتابعة" : "Follow-up question"}
               </h4>
               <p className="lifefix-followup-callout__text">
-                {solution.follow_up_question}
+                {solution.follow_up_question.trim()}
               </p>
             </div>
           </section>
@@ -203,11 +239,9 @@ export function SolutionDocument({
             onRefineSuccess={onSolutionRefined}
           />
         )}
-
       </div>
     </article>
   );
 }
-
 
 export default SolutionDocument;

@@ -9,7 +9,8 @@ export function CausesSection({
   isRtl = false,
   className = "",
 }: CausesSectionProps) {
-  if (!causes || causes.length === 0) {
+  const validCauses = causes ? causes.filter((c) => c && c.trim().length > 0) : [];
+  if (validCauses.length === 0) {
     return null;
   }
 
@@ -27,7 +28,7 @@ export function CausesSection({
       </h3>
 
       <ul className="lifefix-causes-list">
-        {causes.map((cause, index) => (
+        {validCauses.map((cause, index) => (
           <li key={index} className="lifefix-cause-item">
             <span className="lifefix-cause-item__bullet" aria-hidden="true">
               •
@@ -39,5 +40,6 @@ export function CausesSection({
     </section>
   );
 }
+
 
 export default CausesSection;

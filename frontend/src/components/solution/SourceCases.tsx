@@ -11,7 +11,10 @@ export function SourceCases({
   isRtl = false,
   className = "",
 }: SourceCasesProps) {
-  if (!sources || sources.length === 0) {
+  const validSources = sources
+    ? sources.filter((s) => s && s.title && s.title.trim().length > 0)
+    : [];
+  if (validSources.length === 0) {
     return null;
   }
 
@@ -49,12 +52,16 @@ export function SourceCases({
       </div>
 
       <div className="lifefix-source-cases__list">
-        {sources.map((item, idx) => {
+        {validSources.map((item, idx) => {
           // Format ID cleanly (short 8-char prefix if UUID)
           const shortId = item.problem_id.length > 8 ? item.problem_id.slice(0, 8) : item.problem_id;
 
           return (
-            <div key={`${item.problem_id}-${idx}`} className="lifefix-source-pill">
+            <div
+              key={`${item.problem_id}-${idx}`}
+              className="lifefix-source-pill"
+              title={item.title}
+            >
               <span className="lifefix-source-pill__id">#{shortId}</span>
               <span className="lifefix-source-pill__title">{item.title}</span>
             </div>
@@ -63,6 +70,7 @@ export function SourceCases({
       </div>
     </section>
   );
+
 }
 
 export default SourceCases;
