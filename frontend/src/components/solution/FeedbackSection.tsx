@@ -2,8 +2,13 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import axios from "axios";
 import Button from "../ui/Button";
 import StarRating from "./StarRating";
+import RefinementSection from "./RefinementSection";
 import api from "../../services/api";
-import type { AttemptFeedbackRequest, AttemptFeedbackResponse } from "../../types";
+import type {
+  AttemptFeedbackRequest,
+  AttemptFeedbackResponse,
+  LifeFixSolutionResponse,
+} from "../../types";
 import "./FeedbackSection.css";
 
 const MAX_COMMENT_CHARS = 1000;
@@ -11,6 +16,7 @@ const MAX_COMMENT_CHARS = 1000;
 export interface FeedbackSectionProps {
   attemptId: string;
   isRtl?: boolean;
+  onRefineSuccess?: (newSolution: LifeFixSolutionResponse) => void;
   className?: string;
 }
 
@@ -19,9 +25,11 @@ type FeedbackStep = "idle" | "yes_form" | "submitted_success" | "submitted_unsuc
 export function FeedbackSection({
   attemptId,
   isRtl = false,
+  onRefineSuccess,
   className = "",
 }: FeedbackSectionProps) {
   const [step, setStep] = useState<FeedbackStep>("idle");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
@@ -446,41 +454,51 @@ export function FeedbackSection({
       )}
 
       {/* ------------------------------------------------------------------
-         State 5: Unsuccessful Acknowledgment Confirmation (No flow)
+         State 5: Unsuccessful Acknowledgment Confirmation & Refinement UI
          ------------------------------------------------------------------ */}
       {step === "submitted_unsuccessful" && (
-        <div className="lifefix-feedback__confirmation lifefix-feedback__confirmation--note" role="status">
-          <div className="lifefix-feedback__confirm-icon lifefix-feedback__confirm-icon--note" aria-hidden="true">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
+        <div className="lifefix-feedback__unsuccessful-wrapper">
+          <div className="lifefix-feedback__confirmation lifefix-feedback__confirmation--note" role="status">
+            <div className="lifefix-feedback__confirm-icon lifefix-feedback__confirm-icon--note" aria-hidden="true">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+            </div>
+            <div className="lifefix-feedback__confirm-content">
+              <h4 className="lifefix-feedback__confirm-title">
+                {isRtl ? "شكراً لإعلامنا" : "Thank you for letting us know."}
+              </h4>
+              <p className="lifefix-feedback__confirm-desc">
+                {backendMessage ||
+                  (isRtl
+                    ? "تم تسجيل أن هذا الحل لم يساعد في حل المشكلة. دعنا نحسّن الحل معاً."
+                    : "We've recorded that this solution didn't resolve your problem. Let's refine the solution together.")}
+              </p>
+            </div>
           </div>
-          <div className="lifefix-feedback__confirm-content">
-            <h4 className="lifefix-feedback__confirm-title">
-              {isRtl ? "شكراً لإعلامنا" : "Thank you for letting us know."}
-            </h4>
-            <p className="lifefix-feedback__confirm-desc">
-              {backendMessage ||
-                (isRtl
-                  ? "تم تسجيل أن هذا الحل لم يساعد في حل المشكلة. سنعمل على تحسين دقة الحلول."
-                  : "We've recorded that this solution didn't resolve your problem. This helps improve future guidance.")}
-            </p>
-          </div>
+
+          {/* Refinement UI appears only after negative feedback has been successfully recorded */}
+          <RefinementSection
+            attemptId={attemptId}
+            isRtl={isRtl}
+            onRefineSuccess={onRefineSuccess}
+          />
         </div>
       )}
     </section>
   );
 }
+
 
 export default FeedbackSection;

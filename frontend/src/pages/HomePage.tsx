@@ -38,6 +38,7 @@ export function HomePage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [solution, setSolution] = useState<LifeFixSolutionResponse | null>(null);
   const [submittedProblem, setSubmittedProblem] = useState("");
+  const [attemptNumber, setAttemptNumber] = useState(1);
   // attempt_id preserved in React state for subsequent feedback/refinement workflows
   const [, setAttemptId] = useState<string | null>(null);
 
@@ -85,6 +86,7 @@ export function HomePage() {
       setSolution(response.data);
       setAttemptId(response.data.attempt_id);
       setSubmittedProblem(trimmed);
+      setAttemptNumber(1);
 
       // Smoothly transition focus and scroll to the solution document
       setTimeout(() => {
@@ -126,6 +128,20 @@ export function HomePage() {
       setIsLoading(false);
     }
   };
+
+  const handleSolutionRefined = (newSolution: LifeFixSolutionResponse) => {
+    setSolution(newSolution);
+    setAttemptId(newSolution.attempt_id);
+    setAttemptNumber((prev) => prev + 1);
+
+    setTimeout(() => {
+      solutionSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+  };
+
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // Cross-platform keyboard shortcut: Ctrl + Enter (Win/Linux) or Cmd + Enter (macOS)
@@ -338,10 +354,13 @@ export function HomePage() {
             <SolutionDocument
               solution={solution}
               originalProblem={submittedProblem}
+              attemptNumber={attemptNumber}
+              onSolutionRefined={handleSolutionRefined}
               onEditProblem={handleEditProblem}
             />
           </div>
         )}
+
 
         {/* Supporting Philosophy Pillars (Visible prior to solution) */}
         {!solution && !isLoading && (

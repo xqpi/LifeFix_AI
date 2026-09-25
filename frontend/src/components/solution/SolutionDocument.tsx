@@ -6,11 +6,14 @@ import WarningCallout from "./WarningCallout";
 import SourceCases from "./SourceCases";
 import FeedbackSection from "./FeedbackSection";
 import Button from "../ui/Button";
+import Badge from "../ui/Badge";
 import "./SolutionDocument.css";
 
 export interface SolutionDocumentProps {
   solution: LifeFixSolutionResponse;
   originalProblem?: string;
+  attemptNumber?: number;
+  onSolutionRefined?: (newSolution: LifeFixSolutionResponse) => void;
   onEditProblem?: () => void;
   className?: string;
 }
@@ -18,6 +21,8 @@ export interface SolutionDocumentProps {
 export function SolutionDocument({
   solution,
   originalProblem,
+  attemptNumber = 1,
+  onSolutionRefined,
   onEditProblem,
   className = "",
 }: SolutionDocumentProps) {
@@ -40,11 +45,37 @@ export function SolutionDocument({
       {originalProblem && (
         <header className="lifefix-solution-doc__header">
           <div className="lifefix-solution-doc__problem-badge">
-            <span className="lifefix-solution-doc__badge-label">
-              {isRtl ? "المشكلة:" : "Your Problem:"}
-            </span>
+            <div className="lifefix-solution-doc__badge-top">
+              <span className="lifefix-solution-doc__badge-label">
+                {isRtl ? "المشكلة:" : "Your Problem:"}
+              </span>
+              {attemptNumber > 1 && (
+                <Badge variant="primary" size="sm" className="lifefix-solution-doc__lineage-badge">
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                  </svg>
+                  <span>
+                    {isRtl
+                      ? `تحسين الحل · المحاولة ${attemptNumber}`
+                      : `Solution refinement · Attempt ${attemptNumber}`}
+                  </span>
+                </Badge>
+              )}
+            </div>
             <p className="lifefix-solution-doc__problem-text">{originalProblem}</p>
           </div>
+
 
           {onEditProblem && (
             <Button
@@ -163,10 +194,16 @@ export function SolutionDocument({
           <SourceCases sources={solution.source_cases} isRtl={isRtl} />
         )}
 
-        {/* 8. Solution Feedback Loop (DESIGN.md Section 12) */}
+        {/* 8. Solution Feedback & Refinement Loop (DESIGN.md Section 12 & 13) */}
         {solution.attempt_id && (
-          <FeedbackSection attemptId={solution.attempt_id} isRtl={isRtl} />
+          <FeedbackSection
+            key={solution.attempt_id}
+            attemptId={solution.attempt_id}
+            isRtl={isRtl}
+            onRefineSuccess={onSolutionRefined}
+          />
         )}
+
       </div>
     </article>
   );

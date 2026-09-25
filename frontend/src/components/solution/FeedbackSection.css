@@ -300,6 +300,12 @@
   flex: 1;
 }
 
+.lifefix-feedback__unsuccessful-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .lifefix-feedback__confirm-title {
   font-size: 15px;
   font-weight: 600;

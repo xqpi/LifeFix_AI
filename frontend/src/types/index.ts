@@ -104,3 +104,11 @@ export interface AttemptFeedbackResponse {
   feedback_recorded: boolean;
   message: string;
 }
+
+/**
+ * User request payload for refining an unsuccessful problem attempt.
+ * Matches RefineProblemRequest from backend/app/schemas/solver.py
+ */
+export interface RefineProblemRequest {
+  additional_information: string;
+}
