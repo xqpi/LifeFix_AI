@@ -1,0 +1,32 @@
+.lifefix-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-background);
+}
+
+.lifefix-layout__content {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.lifefix-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-border-subtle);
+  background-color: var(--color-background);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+}
+
+.lifefix-footer__text {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.lifefix-footer__subtext {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}

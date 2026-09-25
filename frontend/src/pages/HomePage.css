@@ -1,0 +1,147 @@
+.lifefix-home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* Hero Section */
+.lifefix-home__hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+}
+
+.lifefix-home__badge {
+  margin-bottom: var(--space-1);
+}
+
+.lifefix-home__title {
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--color-text-primary);
+}
+
+@media (min-width: 640px) {
+  .lifefix-home__title {
+    font-size: 32px;
+  }
+}
+
+.lifefix-home__subtitle {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .lifefix-home__subtitle {
+    font-size: 17px;
+  }
+}
+
+/* Workspace Preview Box */
+.lifefix-workspace-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  position: relative;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.lifefix-workspace-preview__mock-input {
+  width: 100%;
+  min-height: 110px;
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.55;
+  display: flex;
+  align-items: flex-start;
+  user-select: none;
+}
+
+.lifefix-workspace-preview__categories {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.lifefix-workspace-preview__categories-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.lifefix-workspace-preview__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-subtle);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.lifefix-workspace-preview__hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* Pillar Features */
+.lifefix-home__pillars {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .lifefix-home__pillars {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.lifefix-pillar-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.lifefix-pillar-card__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-1);
+}
+
+.lifefix-pillar-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.lifefix-pillar-card__description {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}

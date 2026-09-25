@@ -1,0 +1,34 @@
+.lifefix-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  padding: var(--space-5);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.lifefix-card--xl {
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+}
+
+.lifefix-card--elevated {
+  box-shadow: var(--shadow-sm);
+}
+
+.lifefix-card--subtle {
+  background-color: var(--color-background-subtle);
+  border-color: var(--color-border-subtle);
+  box-shadow: none;
+}
+
+.lifefix-card--interactive {
+  cursor: pointer;
+}
+
+.lifefix-card--interactive:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-sm);
+}

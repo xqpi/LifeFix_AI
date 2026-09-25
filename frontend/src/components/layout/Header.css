@@ -1,0 +1,122 @@
+.lifefix-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  height: var(--header-height-desktop);
+  background-color: rgba(248, 249, 250, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border);
+  transition: border-color var(--transition-fast);
+}
+
+@media (max-width: 639px) {
+  .lifefix-header {
+    height: var(--header-height-mobile);
+  }
+}
+
+.lifefix-header__inner {
+  height: 100%;
+  max-width: var(--max-w-header);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .lifefix-header__inner {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .lifefix-header__inner {
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+  }
+}
+
+.lifefix-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  color: var(--color-text-primary);
+}
+
+.lifefix-header__logo-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-primary-border);
+  flex-shrink: 0;
+}
+
+.lifefix-header__wordmark {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.lifefix-header__wordmark-dot {
+  color: var(--color-primary);
+}
+
+.lifefix-header__tagline {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .lifefix-header__tagline {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    background-color: var(--color-background-subtle);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    margin-left: var(--space-1);
+  }
+}
+
+.lifefix-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.lifefix-header__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.lifefix-header__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+}

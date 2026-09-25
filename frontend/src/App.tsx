@@ -1,30 +1,17 @@
-import { useEffect, useState } from "react";
-import api from "./services/api";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import AppLayout from "./components/layout/AppLayout";
+import HomePage from "./pages/HomePage";
 
-function App() {
-
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-
-    api.get("/")
-      .then((response) => {
-        setMessage(response.data.message);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-
-  }, []);
-
+export function App() {
   return (
-    <div>
-      <h1>LifeFix</h1>
-
-      <p>
-        {message}
-      </p>
-    </div>
+    <BrowserRouter>
+      <AppLayout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppLayout>
+    </BrowserRouter>
   );
 }
 

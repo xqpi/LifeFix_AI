@@ -1,0 +1,65 @@
+.lifefix-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.lifefix-badge--sm {
+  font-size: 11px;
+  padding: 1px 6px;
+}
+
+.lifefix-badge--square {
+  border-radius: var(--radius-xs);
+}
+
+/* Default / Neutral Variant */
+.lifefix-badge--default {
+  background-color: var(--color-background-subtle);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+/* Primary Iris Variant */
+.lifefix-badge--primary {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-color: var(--color-primary-border);
+}
+
+/* Success Emerald Variant */
+.lifefix-badge--success {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+  border-color: var(--color-success-border);
+}
+
+/* Warning Amber Variant */
+.lifefix-badge--warning {
+  background-color: var(--color-warning-soft);
+  color: var(--color-warning);
+  border-color: var(--color-warning-border);
+}
+
+/* Error Rose Variant */
+.lifefix-badge--error {
+  background-color: var(--color-error-soft);
+  color: var(--color-error);
+  border-color: var(--color-error-border);
+}
+
+/* Info Blue Variant */
+.lifefix-badge--info {
+  background-color: var(--color-info-soft);
+  color: var(--color-info);
+  border-color: var(--color-info-border);
+}
