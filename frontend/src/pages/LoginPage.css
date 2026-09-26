@@ -122,6 +122,70 @@
   cursor: not-allowed;
 }
 
+.lifefix-form-input--invalid {
+  border-color: var(--color-error);
+}
+
+.lifefix-form-input--invalid:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px var(--color-error-soft);
+}
+
+/* Accessible Password Input with Show/Hide Toggle */
+.lifefix-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.lifefix-password-wrapper .lifefix-form-input {
+  padding-inline-end: 44px;
+}
+
+.lifefix-password-toggle {
+  position: absolute;
+  inset-inline-end: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  line-height: 1;
+}
+
+.lifefix-password-toggle:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-background-subtle);
+}
+
+.lifefix-password-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.lifefix-form-field-error {
+  font-size: 12px;
+  color: var(--color-error);
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lifefix-form-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
 .lifefix-auth-submit {
   width: 100%;
   justify-content: center;

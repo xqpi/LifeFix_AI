@@ -4,7 +4,7 @@ import Button from "../ui/Button";
 import "./Header.css";
 
 export function Header() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -54,7 +54,13 @@ export function Header() {
 
           {/* Authentication Actions */}
           <div className="lifefix-header__auth">
-            {isAuthenticated && user ? (
+            {isLoading ? (
+              <div
+                className="lifefix-header__skeleton"
+                aria-label="Checking account session"
+                role="status"
+              />
+            ) : isAuthenticated && user ? (
               <div className="lifefix-header__user-menu">
                 <div
                   className="lifefix-header__user-chip"

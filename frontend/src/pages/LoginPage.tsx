@@ -7,6 +7,8 @@ import Button from "../components/ui/Button";
 import PageContainer from "../components/ui/PageContainer";
 import "./LoginPage.css";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function LoginPage() {
   const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
@@ -14,8 +16,10 @@ export function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || "/";
 
@@ -26,13 +30,32 @@ export function LoginPage() {
     }
   }, [isAuthenticated, isAuthLoading, navigate, from]);
 
+  if (isAuthenticated && !isAuthLoading) {
+    return null;
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const cleanEmail = email.trim();
-    if (!cleanEmail || !password || isSubmitting) {
+    const newFieldErrors: { email?: string; password?: string } = {};
+
+    if (!cleanEmail) {
+      newFieldErrors.email = "Email address is required.";
+    } else if (!EMAIL_REGEX.test(cleanEmail)) {
+      newFieldErrors.email = "Please enter a valid email address.";
+    }
+
+    if (!password) {
+      newFieldErrors.password = "Password is required.";
+    }
+
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
+      setErrorMessage("Please correct the errors below to continue.");
       return;
     }
 
+    setFieldErrors({});
     setIsSubmitting(true);
     setErrorMessage(null);
 
@@ -57,6 +80,26 @@ export function LoginPage() {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (fieldErrors.email) {
+      setFieldErrors((prev) => ({ ...prev, email: undefined }));
+    }
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
+  };
+
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (fieldErrors.password) {
+      setFieldErrors((prev) => ({ ...prev, password: undefined }));
+    }
+    if (errorMessage) {
+      setErrorMessage(null);
     }
   };
 
@@ -88,7 +131,12 @@ export function LoginPage() {
         {/* Auth Card */}
         <Card variant="xl" elevated className="lifefix-auth-card">
           {errorMessage && (
-            <div className="lifefix-auth-error-banner" role="alert">
+            <div
+              id="login-error-banner"
+              className="lifefix-auth-error-banner"
+              role="alert"
+              aria-live="polite"
+            >
               <svg
                 width="16"
                 height="16"
@@ -120,27 +168,100 @@ export function LoginPage() {
                 autoComplete="email"
                 placeholder="name@example.com"
                 value={email}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 disabled={isSubmitting}
-                className="lifefix-form-input"
+                aria-invalid={Boolean(fieldErrors.email)}
+                aria-describedby={
+                  fieldErrors.email
+                    ? "auth-email-error"
+                    : errorMessage
+                    ? "login-error-banner"
+                    : undefined
+                }
+                className={`lifefix-form-input ${
+                  fieldErrors.email ? "lifefix-form-input--invalid" : ""
+                }`}
               />
+              {fieldErrors.email && (
+                <span id="auth-email-error" className="lifefix-form-field-error" role="alert">
+                  {fieldErrors.email}
+                </span>
+              )}
             </div>
 
             <div className="lifefix-form-group">
               <label htmlFor="auth-password" className="lifefix-form-label">
                 Password
               </label>
-              <input
-                id="auth-password"
-                type="password"
-                required
-                autoComplete="current-password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                disabled={isSubmitting}
-                className="lifefix-form-input"
-              />
+              <div className="lifefix-password-wrapper">
+                <input
+                  id="auth-password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={handlePasswordChange}
+                  disabled={isSubmitting}
+                  aria-invalid={Boolean(fieldErrors.password)}
+                  aria-describedby={
+                    fieldErrors.password
+                      ? "auth-password-error"
+                      : errorMessage
+                      ? "login-error-banner"
+                      : undefined
+                  }
+                  className={`lifefix-form-input ${
+                    fieldErrors.password ? "lifefix-form-input--invalid" : ""
+                  }`}
+                />
+                <button
+                  type="button"
+                  className="lifefix-password-toggle"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  disabled={isSubmitting}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              {fieldErrors.password && (
+                <span id="auth-password-error" className="lifefix-form-field-error" role="alert">
+                  {fieldErrors.password}
+                </span>
+              )}
             </div>
 
             <Button
@@ -148,7 +269,7 @@ export function LoginPage() {
               variant="primary"
               size="lg"
               isLoading={isSubmitting}
-              disabled={isSubmitting || !email.trim() || !password}
+              disabled={isSubmitting}
               className="lifefix-auth-submit"
             >
               Sign In
