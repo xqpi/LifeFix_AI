@@ -175,6 +175,19 @@
   margin: 0;
 }
 
+.lifefix-attempt-detail__feedback-pending-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+/* Refinement Section Integration */
+.lifefix-attempt-detail__refinement-wrapper {
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
 /* Footer Navigation */
 .lifefix-attempt-detail__footer {
   padding-top: var(--space-4);

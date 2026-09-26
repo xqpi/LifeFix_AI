@@ -17,6 +17,7 @@ export interface FeedbackSectionProps {
   attemptId: string;
   isRtl?: boolean;
   onRefineSuccess?: (newSolution: LifeFixSolutionResponse) => void;
+  onFeedbackSubmitted?: (wasSuccessful: boolean) => void;
   className?: string;
 }
 
@@ -26,6 +27,7 @@ export function FeedbackSection({
   attemptId,
   isRtl = false,
   onRefineSuccess,
+  onFeedbackSubmitted,
   className = "",
 }: FeedbackSectionProps) {
   const [step, setStep] = useState<FeedbackStep>("idle");
@@ -76,6 +78,7 @@ export function FeedbackSection({
       );
       setBackendMessage(response.data.message);
       setStep("submitted_success");
+      onFeedbackSubmitted?.(true);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 404) {
@@ -130,6 +133,7 @@ export function FeedbackSection({
       );
       setBackendMessage(response.data.message);
       setStep("submitted_unsuccessful");
+      onFeedbackSubmitted?.(false);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 404) {

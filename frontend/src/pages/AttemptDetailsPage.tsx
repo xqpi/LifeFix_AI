@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getAttempt } from "../services/api";
-import type { AttemptDetailResponse } from "../types";
+import type { AttemptDetailResponse, LifeFixSolutionResponse } from "../types";
 import PageContainer from "../components/ui/PageContainer";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
@@ -11,6 +11,8 @@ import CausesSection from "../components/solution/CausesSection";
 import SolutionSteps from "../components/solution/SolutionSteps";
 import WarningCallout from "../components/solution/WarningCallout";
 import SourceCases from "../components/solution/SourceCases";
+import RefinementSection from "../components/solution/RefinementSection";
+import FeedbackSection from "../components/solution/FeedbackSection";
 import "../components/solution/SolutionDocument.css";
 import "./AttemptDetailsPage.css";
 
@@ -100,6 +102,26 @@ export function AttemptDetailsPage() {
       .finally(() => {
         setIsLoading(false);
       });
+  };
+
+  const handleRefineSuccess = (newSolution: LifeFixSolutionResponse) => {
+    if (newSolution.attempt_id) {
+      navigate(`/history/${newSolution.attempt_id}`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleFeedbackSubmitted = (wasSuccessful: boolean) => {
+    setAttempt((prev) => (prev ? { ...prev, was_successful: wasSuccessful } : prev));
+    if (attemptId) {
+      getAttempt(attemptId)
+        .then((data) => {
+          setAttempt(data);
+        })
+        .catch(() => {
+          // Keep optimistic state if network update fails
+        });
+    }
   };
 
   // Auth initializing: render skeleton layout
@@ -459,23 +481,52 @@ export function AttemptDetailsPage() {
                 </div>
               )}
               {attempt.was_successful === null && (
-                <div className="lifefix-attempt-detail__feedback-state lifefix-attempt-detail__feedback-state--pending">
-                  <Badge variant="default" size="md">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 14 14" />
-                    </svg>
-                    <span>{isRtl ? "بانتظار التقييم" : "Feedback pending"}</span>
-                  </Badge>
-                  <p className="lifefix-attempt-detail__feedback-text">
-                    {isRtl
-                      ? "لم يتم تسجيل تقييم نهائي بعد لهذه المحاولة."
-                      : "No resolution feedback was recorded for this attempt."}
-                  </p>
+                <div className="lifefix-attempt-detail__feedback-pending-container">
+                  <div className="lifefix-attempt-detail__feedback-state lifefix-attempt-detail__feedback-state--pending">
+                    <Badge variant="default" size="md">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 14 14" />
+                      </svg>
+                      <span>{isRtl ? "بانتظار التقييم" : "Feedback pending"}</span>
+                    </Badge>
+                    <p className="lifefix-attempt-detail__feedback-text">
+                      {isRtl
+                        ? "لم يتم تسجيل تقييم نهائي بعد لهذه المحاولة. يرجى تقديم تقييمك أدناه:"
+                        : "No resolution feedback was recorded for this attempt. Please provide your feedback below:"}
+                    </p>
+                  </div>
+                  <FeedbackSection
+                    attemptId={attempt.id}
+                    isRtl={isRtl}
+                    onFeedbackSubmitted={handleFeedbackSubmitted}
+                    onRefineSuccess={handleRefineSuccess}
+                  />
                 </div>
               )}
             </div>
           </section>
+
+          {/* 9. Refinement Section for Unsuccessful Attempts */}
+          {attempt.was_successful === false && (
+            <section
+              className="lifefix-attempt-detail__refinement-wrapper"
+              aria-label={isRtl ? "تحسين المشكلة" : "Refine Problem"}
+            >
+              <RefinementSection
+                attemptId={attempt.id}
+                isRtl={isRtl}
+                title={isRtl ? "لم يساعدك هذا الحل؟" : "This solution didn't solve the problem?"}
+                subtitle={
+                  isRtl
+                    ? "أخبر LifeFix بما حدث عند تجربة الخطوات أو أضف معلومات إضافية لنحسّن الحل."
+                    : "Tell LifeFix what happened or add more information to refine the solution."
+                }
+                buttonText={isRtl ? "تحسين هذه المشكلة" : "Refine This Problem"}
+                onRefineSuccess={handleRefineSuccess}
+              />
+            </section>
+          )}
         </div>
 
         {/* Footer Actions */}

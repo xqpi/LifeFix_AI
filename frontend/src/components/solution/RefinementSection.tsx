@@ -7,7 +7,7 @@ import {
 } from "react";
 import axios from "axios";
 import Button from "../ui/Button";
-import api from "../../services/api";
+import { refineAttempt } from "../../services/api";
 import type { LifeFixSolutionResponse, RefineProblemRequest } from "../../types";
 import "./RefinementSection.css";
 
@@ -16,6 +16,9 @@ const MAX_REFINEMENT_CHARS = 2000;
 export interface RefinementSectionProps {
   attemptId: string;
   isRtl?: boolean;
+  title?: string;
+  subtitle?: string;
+  buttonText?: string;
   onRefineSuccess?: (newSolution: LifeFixSolutionResponse) => void;
   className?: string;
 }
@@ -23,6 +26,9 @@ export interface RefinementSectionProps {
 export function RefinementSection({
   attemptId,
   isRtl = false,
+  title,
+  subtitle,
+  buttonText,
   onRefineSuccess,
   className = "",
 }: RefinementSectionProps) {
@@ -71,11 +77,8 @@ export function RefinementSection({
     };
 
     try {
-      const response = await api.post<LifeFixSolutionResponse>(
-        `/api/attempts/${attemptId}/refine`,
-        payload
-      );
-      onRefineSuccess?.(response.data);
+      const responseData = await refineAttempt(attemptId, payload);
+      onRefineSuccess?.(responseData);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 404) {
@@ -155,12 +158,13 @@ export function RefinementSection({
         </div>
         <div className="lifefix-refinement__titles">
           <h3 id="refinement-title" className="lifefix-refinement__title">
-            {isRtl ? "لنحسّن الحل" : "Let's refine the solution"}
+            {title || (isRtl ? "لنحسّن الحل" : "Let's refine the solution")}
           </h3>
           <p className="lifefix-refinement__subtitle">
-            {isRtl
-              ? "أخبرني بما حدث عند تجربة الخطوات، أو أضف أي معلومات لم تذكرها من قبل."
-              : "Tell me what happened when you tried the steps, or add anything you didn't mention before."}
+            {subtitle ||
+              (isRtl
+                ? "أخبرني بما حدث عند تجربة الخطوات، أو أضف أي معلومات لم تذكرها من قبل."
+                : "Tell me what happened when you tried the steps, or add anything you didn't mention before.")}
           </p>
         </div>
       </div>
@@ -287,9 +291,7 @@ export function RefinementSection({
               ? isRtl
                 ? "جاري تحسين الحل..."
                 : "Refining solution..."
-              : isRtl
-              ? "تحسين الحل"
-              : "Refine Solution"}
+              : buttonText || (isRtl ? "تحسين الحل" : "Refine Solution")}
           </Button>
         </div>
       </form>

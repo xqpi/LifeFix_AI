@@ -1,5 +1,10 @@
 import axios from "axios";
-import type { AttemptDetailResponse, AttemptHistoryResponse } from "../types";
+import type {
+  AttemptDetailResponse,
+  AttemptHistoryResponse,
+  LifeFixSolutionResponse,
+  RefineProblemRequest,
+} from "../types";
 import { getStoredToken, removeStoredToken } from "./tokenStorage";
 
 export type UnauthorizedCallback = () => void;
@@ -69,6 +74,21 @@ export async function getAttemptHistory(
  */
 export async function getAttempt(attemptId: string): Promise<AttemptDetailResponse> {
   const response = await api.get<AttemptDetailResponse>(`/api/attempts/${attemptId}`);
+  return response.data;
+}
+
+/**
+ * Refine an unsuccessful problem attempt with additional context, producing a new child attempt.
+ * POST /api/attempts/{attempt_id}/refine
+ */
+export async function refineAttempt(
+  attemptId: string,
+  payload: RefineProblemRequest
+): Promise<LifeFixSolutionResponse> {
+  const response = await api.post<LifeFixSolutionResponse>(
+    `/api/attempts/${attemptId}/refine`,
+    payload
+  );
   return response.data;
 }
 
