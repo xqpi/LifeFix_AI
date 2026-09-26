@@ -1,6 +1,7 @@
 """API endpoints for problem attempts, including user history retrieval."""
 
 import logging
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -8,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.db.database import get_db
 from app.models.user import User
-from app.schemas.attempt import AttemptHistoryResponse
+from app.schemas.attempt import AttemptDetailResponse, AttemptHistoryResponse
 from app.services.attempt_service import AttemptService
 
 logger = logging.getLogger(__name__)
@@ -47,4 +48,44 @@ def get_attempt_history(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while retrieving attempt history.",
+        )
+
+
+@router.get(
+    "/{attempt_id}",
+    response_model=AttemptDetailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get authenticated user's attempt details",
+)
+def get_attempt_detail(
+    attempt_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> AttemptDetailResponse:
+    """Retrieve details and complete structured solution for a specific attempt owned by the authenticated user."""
+    try:
+        detail = attempt_service.get_attempt_detail(
+            db=db,
+            user=current_user,
+            attempt_id=attempt_id,
+        )
+        if not detail:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Problem attempt not found.",
+            )
+        return detail
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(
+            "Failed to retrieve attempt %s for user %s: %s",
+            attempt_id,
+            current_user.id,
+            exc,
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while retrieving attempt details.",
         )

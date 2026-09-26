@@ -8,6 +8,8 @@ import uuid
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.solver import LifeFixSolutionResponse
+
 logger = logging.getLogger(__name__)
 
 
@@ -71,3 +73,22 @@ class AttemptHistoryResponse(BaseModel):
     limit: int = Field(..., description="Number of items per page")
     total: int = Field(..., description="Total number of attempts belonging to the user")
     has_next: bool = Field(..., description="True if subsequent pages of attempts exist")
+
+
+class AttemptDetailResponse(BaseModel):
+    """Detailed representation of an authenticated user's problem attempt."""
+
+    id: uuid.UUID = Field(..., description="Unique UUID of the problem attempt")
+    user_message: str = Field(..., description="Original problem description submitted by the user")
+    created_at: datetime = Field(..., description="Timestamp when the attempt was created")
+    was_successful: Optional[bool] = Field(
+        default=None, description="Resolution status (True=solved, False=unsolved, None=pending feedback)"
+    )
+    parent_attempt_id: Optional[uuid.UUID] = Field(
+        default=None, description="UUID of the parent attempt if this attempt was a refinement"
+    )
+    solution: LifeFixSolutionResponse = Field(
+        ..., description="Complete structured solution produced by AI problem solving or RAG fallback"
+    )
+
+    model_config = ConfigDict(from_attributes=True)

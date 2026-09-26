@@ -323,6 +323,18 @@ export function HistoryPage() {
                     <p className="lifefix-history-card__preview-text">{item.solution_preview}</p>
                   </div>
                 )}
+
+                {/* Card Action: View Attempt Details */}
+                <div className="lifefix-history-card__actions">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => navigate(`/history/${item.id}`)}
+                    aria-label={`View solution for: ${item.user_message}`}
+                  >
+                    View Solution
+                  </Button>
+                </div>
               </Card>
             ))}
           </section>

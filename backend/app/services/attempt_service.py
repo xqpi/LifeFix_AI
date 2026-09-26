@@ -11,6 +11,7 @@ from app.models.feedback import Feedback
 from app.models.problem_attempt import ProblemAttempt
 from app.models.user import User
 from app.schemas.attempt import (
+    AttemptDetailResponse,
     AttemptHistoryItem,
     AttemptHistoryResponse,
     extract_solution_preview,
@@ -303,4 +304,60 @@ class AttemptService:
             limit=limit,
             total=total,
             has_next=has_next,
+        )
+
+    def get_attempt_detail(
+        self,
+        db: Session,
+        user: User,
+        attempt_id: uuid.UUID,
+    ) -> Optional[AttemptDetailResponse]:
+        """Retrieve a specific problem attempt strictly belonging to the authenticated user.
+
+        Performs a single indexed query by (id, user_id) guaranteeing ownership.
+        Safely deserializes the stored LifeFixSolutionResponse without exposing
+        sensitive metadata, prompts, or internal model reasoning.
+
+        Args:
+            db: Active SQLAlchemy database session.
+            user: Authenticated User model instance.
+            attempt_id: UUID of the target problem attempt.
+
+        Returns:
+            AttemptDetailResponse | None: Populated attempt details if found and owned by user;
+            None if the attempt does not exist or belongs to another user (triggers 404).
+        """
+        attempt = db.scalars(
+            select(ProblemAttempt).where(
+                ProblemAttempt.id == attempt_id,
+                ProblemAttempt.user_id == user.id,
+            )
+        ).first()
+
+        if not attempt:
+            return None
+
+        # Deserialization of structured solution
+        if not attempt.ai_response or not attempt.ai_response.strip():
+            logger.error("Stored ai_response is empty for attempt %s", attempt.id)
+            raise ValueError(f"No solution data available for attempt {attempt.id}.")
+
+        try:
+            solution = LifeFixSolutionResponse.model_validate_json(attempt.ai_response)
+        except Exception as exc:
+            logger.error(
+                "Stored ai_response failed validation as LifeFixSolutionResponse for attempt %s: %s",
+                attempt.id,
+                exc,
+                exc_info=True,
+            )
+            raise ValueError(f"Corrupted or invalid solution data for attempt {attempt.id}.") from exc
+
+        return AttemptDetailResponse(
+            id=attempt.id,
+            user_message=attempt.user_message,
+            created_at=attempt.created_at,
+            was_successful=attempt.was_successful,
+            parent_attempt_id=attempt.parent_attempt_id,
+            solution=solution,
         )

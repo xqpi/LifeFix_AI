@@ -135,6 +135,19 @@ export interface AttemptHistoryResponse {
 }
 
 /**
+ * Detailed problem attempt response from GET /api/attempts/{attempt_id}.
+ * Matches backend app.schemas.attempt.AttemptDetailResponse.
+ */
+export interface AttemptDetailResponse {
+  id: string;
+  user_message: string;
+  created_at: string;
+  was_successful: boolean | null;
+  parent_attempt_id: string | null;
+  solution: LifeFixSolutionResponse;
+}
+
+/**
  * User account model returned by backend /api/auth endpoints.
  * Matches backend/app/schemas/auth.py UserResponse.
  */

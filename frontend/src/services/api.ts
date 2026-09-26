@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { AttemptHistoryResponse } from "../types";
+import type { AttemptDetailResponse, AttemptHistoryResponse } from "../types";
 import { getStoredToken, removeStoredToken } from "./tokenStorage";
 
 export type UnauthorizedCallback = () => void;
@@ -60,6 +60,15 @@ export async function getAttemptHistory(
   const response = await api.get<AttemptHistoryResponse>("/api/attempts/history", {
     params: { page, limit },
   });
+  return response.data;
+}
+
+/**
+ * Fetch a single detailed problem attempt for the authenticated user.
+ * GET /api/attempts/{attempt_id}
+ */
+export async function getAttempt(attemptId: string): Promise<AttemptDetailResponse> {
+  const response = await api.get<AttemptDetailResponse>(`/api/attempts/${attemptId}`);
   return response.data;
 }
 
