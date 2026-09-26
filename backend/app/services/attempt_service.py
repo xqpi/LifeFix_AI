@@ -4,12 +4,17 @@ import logging
 import uuid
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.feedback import Feedback
 from app.models.problem_attempt import ProblemAttempt
 from app.models.user import User
+from app.schemas.attempt import (
+    AttemptHistoryItem,
+    AttemptHistoryResponse,
+    extract_solution_preview,
+)
 from app.schemas.solver import (
     AttemptFeedbackRequest,
     AttemptFeedbackResponse,
@@ -237,4 +242,65 @@ class AttemptService:
             request=solve_request,
             parent_attempt_id=attempt.id,
             user=effective_user,
+        )
+
+    def get_user_history(
+        self,
+        db: Session,
+        user: User,
+        page: int = 1,
+        limit: int = 20,
+    ) -> AttemptHistoryResponse:
+        """Retrieve paginated problem attempts strictly belonging to the authenticated user.
+
+        Ordered newest first (created_at DESC, id DESC). Performs a database-level
+        COUNT query and a paginated SELECT query with OFFSET and LIMIT.
+
+        Args:
+            db: Active SQLAlchemy database session.
+            user: Authenticated User model instance.
+            page: 1-indexed page number (>= 1).
+            limit: Page size limit (1 to 50).
+
+        Returns:
+            AttemptHistoryResponse: Paginated list of attempts with total count and has_next.
+        """
+        # 1. Database-level count for this user only
+        total = db.scalar(
+            select(func.count())
+            .select_from(ProblemAttempt)
+            .where(ProblemAttempt.user_id == user.id)
+        ) or 0
+
+        # 2. Database-level paginated query with deterministic ordering
+        offset = (page - 1) * limit
+        attempts = db.scalars(
+            select(ProblemAttempt)
+            .where(ProblemAttempt.user_id == user.id)
+            .order_by(ProblemAttempt.created_at.desc(), ProblemAttempt.id.desc())
+            .offset(offset)
+            .limit(limit)
+        ).all()
+
+        # 3. Transform to safe response items with solution preview
+        items = [
+            AttemptHistoryItem(
+                id=attempt.id,
+                user_message=attempt.user_message,
+                created_at=attempt.created_at,
+                was_successful=attempt.was_successful,
+                parent_attempt_id=attempt.parent_attempt_id,
+                solution_preview=extract_solution_preview(attempt.ai_response),
+            )
+            for attempt in attempts
+        ]
+
+        has_next = (page * limit) < total
+
+        return AttemptHistoryResponse(
+            items=items,
+            page=page,
+            limit=limit,
+            total=total,
+            has_next=has_next,
         )
