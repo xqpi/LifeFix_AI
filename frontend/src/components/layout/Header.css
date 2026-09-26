@@ -236,3 +236,33 @@
 .lifefix-header__logout-btn:hover {
   color: var(--color-error);
 }
+
+.lifefix-header__history-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.lifefix-header__history-link:hover {
+  color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+
+.lifefix-header__history-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.lifefix-header__history-link--active {
+  color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary-border);
+}

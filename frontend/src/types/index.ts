@@ -110,6 +110,31 @@ export interface RefineProblemRequest {
 }
 
 /**
+ * Single problem attempt item in user history list.
+ * Matches backend app.schemas.attempt.AttemptHistoryItem.
+ */
+export interface AttemptHistoryItem {
+  id: string;
+  user_message: string;
+  created_at: string;
+  was_successful: boolean | null;
+  parent_attempt_id: string | null;
+  solution_preview: string | null;
+}
+
+/**
+ * Paginated attempt history response from GET /api/attempts/history.
+ * Matches backend app.schemas.attempt.AttemptHistoryResponse.
+ */
+export interface AttemptHistoryResponse {
+  items: AttemptHistoryItem[];
+  page: number;
+  limit: number;
+  total: number;
+  has_next: boolean;
+}
+
+/**
  * User account model returned by backend /api/auth endpoints.
  * Matches backend/app/schemas/auth.py UserResponse.
  */

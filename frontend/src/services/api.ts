@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { AttemptHistoryResponse } from "../types";
 import { getStoredToken, removeStoredToken } from "./tokenStorage";
 
 export type UnauthorizedCallback = () => void;
@@ -47,5 +48,19 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * Fetch paginated problem attempt history for the authenticated user.
+ * GET /api/attempts/history?page={page}&limit={limit}
+ */
+export async function getAttemptHistory(
+  page: number = 1,
+  limit: number = 20
+): Promise<AttemptHistoryResponse> {
+  const response = await api.get<AttemptHistoryResponse>("/api/attempts/history", {
+    params: { page, limit },
+  });
+  return response.data;
+}
 
 export default api;

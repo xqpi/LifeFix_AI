@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../ui/Button";
 import "./Header.css";
@@ -6,11 +6,14 @@ import "./Header.css";
 export function Header() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
+
+  const isHistoryActive = location.pathname === "/history";
 
   const displayName = user?.name ? user.name.split(" ")[0] : "Account";
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : "U";
@@ -62,6 +65,30 @@ export function Header() {
               />
             ) : isAuthenticated && user ? (
               <div className="lifefix-header__user-menu">
+                <Link
+                  to="/history"
+                  className={`lifefix-header__history-link ${
+                    isHistoryActive ? "lifefix-header__history-link--active" : ""
+                  }`}
+                  aria-label="View your problem-solving history"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  <span>History</span>
+                </Link>
+
                 <div
                   className="lifefix-header__user-chip"
                   title={`Signed in as ${user.name} (${user.email})`}
