@@ -18,8 +18,8 @@ class LLMServiceError(RuntimeError):
 class LLMService:
     """Encapsulates direct communication with Google Gemini for structured output generation."""
 
-    # Default to Gemini 2.5 Flash as requested, allow override via environment variable
-    DEFAULT_MODEL: str = "gemini-2.5-flash"
+    # Default to Gemini 3.8 Flash as recommended by Google GenAI, allow override via environment variable
+    DEFAULT_MODEL: str = "gemini-3.8-flash"
     DEFAULT_TIMEOUT_SECONDS: float = 30.0
     DEFAULT_TEMPERATURE: float = 0.2
 

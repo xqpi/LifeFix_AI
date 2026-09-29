@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.models.problem_attempt import ProblemAttempt
 from app.models.user import User
-from app.schemas.rag import RAGContextResponse
+from app.schemas.rag import RAGContextResponse, RAGProblemContext
 from app.schemas.solver import (
     LifeFixSolutionResponse,
     LifeFixSolutionStep,
@@ -56,15 +56,21 @@ class ProblemSolverService:
     """Orchestrates RAG context retrieval, prompt construction, LLM generation, and deterministic fallback."""
 
     DEFAULT_TOP_K: int = 5
+    # Conservative development heuristic derived from Step 12.1/12.2 evaluation dataset to separate
+    # out-of-domain queries (~0.75-0.80) from relevant candidates (~0.82-0.91). Not a universal cutoff;
+    # applied in combination with substantive term overlap and language consistency checks.
+    MIN_CONFIDENCE_THRESHOLD: float = 0.82
 
     def __init__(
         self,
         rag_context_service: Optional[RAGContextService] = None,
         llm_service: Optional[LLMService] = None,
+        min_confidence_threshold: float = MIN_CONFIDENCE_THRESHOLD,
     ) -> None:
-        """Initialize the problem solver with RAG context service and optional LLM service."""
+        """Initialize the problem solver with RAG context service, optional LLM service, and confidence threshold."""
         self.rag_context_service = rag_context_service or RAGContextService()
         self._llm_service = llm_service
+        self.min_confidence_threshold = min_confidence_threshold
 
     @property
     def llm_service(self) -> LLMService:
@@ -78,6 +84,37 @@ class ProblemSolverService:
         """Detect if the text contains Arabic characters."""
         return any("\u0600" <= char <= "\u06FF" for char in text)
 
+    @staticmethod
+    def _has_substantive_overlap(query: str, target: str) -> bool:
+        """Determine if query and target problem text share substantive content terms.
+
+        Filters common conversational stopwords in Arabic and English to distinguish
+        actual domain problem alignment from accidental intra-language lexical noise.
+        """
+        import re
+
+        q_words = set(re.findall(r"\w{3,}", query.lower()))
+        t_words = set(re.findall(r"\w{3,}", target.lower()))
+
+        stopwords = {
+            # Arabic stopwords
+            "على", "إلى", "عن", "مع", "داخل", "جدأ", "جدا", "في", "من", "هذا", "هذه", "التي", "الذي",
+            "بين", "أو", "ثم", "حتى", "كان", "كانت", "يكون", "عندي", "بتاخد", "بصير", "عشان", "نفس",
+            # English stopwords
+            "the", "and", "for", "with", "this", "that", "from", "when", "have", "has", "very",
+            "too", "much", "many", "more", "some", "any", "into", "onto", "out", "off", "are",
+        }
+        content_q = q_words - stopwords
+        content_t = t_words - stopwords
+        if not content_q or not content_t:
+            return False
+
+        for qw in content_q:
+            for tw in content_t:
+                if qw == tw or (len(qw) >= 4 and len(tw) >= 4 and (qw in tw or tw in qw)):
+                    return True
+        return False
+
     def _build_prompt(
         self,
         request: SolveProblemRequest,
@@ -86,10 +123,16 @@ class ProblemSolverService:
         """Assemble a prompt containing the user problem and formatted RAG knowledge."""
         lines = ["### RETRIEVED LIFEFIX KNOWLEDGE (Reference Material Only):"]
 
-        if not rag_context.retrieved_problems:
-            lines.append("No directly matching cases found in the knowledge base.")
+        # Only pass confident matching problems into the LLM prompt to prevent irrelevant distraction
+        confident_problems = [
+            p for p in rag_context.retrieved_problems
+            if p.similarity_score >= self.min_confidence_threshold
+        ]
+
+        if not confident_problems:
+            lines.append("No directly matching cases found in the knowledge base (retrieval similarity below confidence threshold).")
         else:
-            for prob in rag_context.retrieved_problems:
+            for prob in confident_problems:
                 lines.append(f"\n[Case ID: {prob.problem_id}]")
                 lines.append(f"Title: {prob.title}")
                 lines.append(f"Category: {prob.category}")
@@ -129,130 +172,252 @@ class ProblemSolverService:
         request: SolveProblemRequest,
         rag_context: RAGContextResponse,
     ) -> LifeFixSolutionResponse:
-        """Construct a deterministic, schema-valid fallback response from RAG context."""
+        """Construct a deterministic, schema-valid, language-consistent fallback response."""
         is_ar = self._is_arabic(request.problem_description)
 
-        # Find the highest-ranked retrieved problem that has solution steps
-        top_problem = next(
-            (p for p in rag_context.retrieved_problems if p.solutions), None
-        )
+        # 1. Filter problems that meet the minimum confidence threshold and have recorded solutions
+        qualifying = [
+            p for p in rag_context.retrieved_problems
+            if p.similarity_score >= self.min_confidence_threshold and p.solutions
+        ]
 
-        if top_problem and top_problem.solutions:
-            # Map existing solutions to LifeFixSolutionStep
-            steps = [
-                LifeFixSolutionStep(
-                    step_number=sol.step_number,
-                    title=sol.title,
-                    instruction=sol.solution_text,
-                    difficulty=sol.difficulty or "medium",
-                    estimated_time_minutes=sol.estimated_time_minutes
-                    if sol.estimated_time_minutes is not None
-                    else 5,
-                )
-                for sol in top_problem.solutions
-            ]
+        if not qualifying:
+            # Low-confidence or irrelevant query: return safe, honest exploratory guidance
+            return self._build_low_confidence_response(request, is_ar)
 
-            source_cases = [
-                LifeFixSourceCase(problem_id=p.problem_id, title=p.title)
-                for p in rag_context.retrieved_problems
-                if p.solutions
-            ]
+        # 2. Separate candidates by language matching
+        same_lang_candidates = [
+            p for p in qualifying if self._is_arabic(p.title) == is_ar
+        ]
+        cross_lang_candidates = [
+            p for p in qualifying if self._is_arabic(p.title) != is_ar
+        ]
 
-            if is_ar:
-                understanding = (
-                    f"تم استرجاع خطوات عملية لحل المشكلة من قاعدة معرفة LifeFix "
-                    f"بناءً على حالة مشابهة: {top_problem.title}"
-                )
-                possible_causes = [
-                    f"عوامل شائعة مرتبطة بفئة {top_problem.category}: {top_problem.description}"
-                ]
-                explanations = [
-                    "هذه الخطوات مستخرجة مباشرة من قاعدة المعرفة المعتمدة لدى LifeFix للتعامل مع هذا النوع من المشاكل اليومية."
-                ]
-                warnings_or_notes = [
-                    "تنبيه: تم إنشاء هذا الحل مباشرة من قاعدة معرفة LifeFix نظراً لتعذر الاتصال بمساعد الذكاء الاصطناعي في الوقت الحالي."
-                ]
-                follow_up_question = (
-                    "هل تود تزويدنا بتفاصيل إضافية حول بيئة العمل أو نوع الجهاز لتقديم مساعدة أدق؟"
-                )
-            else:
-                understanding = (
-                    f"Retrieved practical problem-solving guidance directly from the LifeFix knowledge base "
-                    f"based on: {top_problem.title}"
-                )
-                possible_causes = [
-                    f"Common factors associated with {top_problem.category}: {top_problem.description}"
-                ]
-                explanations = [
-                    "These steps are retrieved directly from the verified LifeFix knowledge base for everyday problem solving."
-                ]
-                warnings_or_notes = [
-                    "Note: This response was generated directly from the LifeFix knowledge base as the AI service is currently unavailable."
-                ]
-                follow_up_question = (
-                    "Would you like to provide additional details about your specific setup or symptoms to refine these steps?"
-                )
+        # 3. Determine best relevant candidate problem
+        selected_problem: Optional[RAGProblemContext] = None
+        is_cross_lingual: bool = False
 
-            return LifeFixSolutionResponse(
-                understanding=understanding,
-                possible_causes=possible_causes,
-                recommended_steps=steps,
-                explanations=explanations,
-                warnings_or_notes=warnings_or_notes,
-                follow_up_question=follow_up_question,
-                source_cases=source_cases,
+        if same_lang_candidates:
+            top_same = same_lang_candidates[0]
+            # Check if top same-language candidate has substantive relevance to the query
+            has_overlap = self._has_substantive_overlap(
+                request.problem_description, f"{top_same.title} {top_same.description}"
             )
+            if has_overlap:
+                selected_problem = top_same
+                is_cross_lingual = False
+            elif cross_lang_candidates:
+                # Top same-language candidate is an intra-language distraction (e.g. furniture dust for laundry drying).
+                # Cross-language candidate is the true target, but stored in the other language.
+                selected_problem = cross_lang_candidates[0]
+                is_cross_lingual = True
+            else:
+                # Neither has substantive overlap; safe exploratory guidance
+                return self._build_low_confidence_response(request, is_ar)
+        elif cross_lang_candidates:
+            selected_problem = cross_lang_candidates[0]
+            is_cross_lingual = True
 
-        # Baseline fallback when no retrieved problems have solutions
+        if not selected_problem:
+            return self._build_low_confidence_response(request, is_ar)
+
+        # 4. Handle language consistency:
+        if is_cross_lingual:
+            # Cross-language fallback: explain that a similar case was found, but verified steps are in the other language
+            return self._build_cross_language_fallback(request, selected_problem, is_ar)
+
+        # 5. Same-language fallback: project verified database solution steps directly
+        steps = [
+            LifeFixSolutionStep(
+                step_number=sol.step_number,
+                title=sol.title,
+                instruction=sol.solution_text,
+                difficulty=sol.difficulty or "medium",
+                estimated_time_minutes=sol.estimated_time_minutes
+                if sol.estimated_time_minutes is not None
+                else 5,
+            )
+            for sol in selected_problem.solutions
+        ]
+
+        source_cases = [
+            LifeFixSourceCase(problem_id=selected_problem.problem_id, title=selected_problem.title)
+        ]
+
         if is_ar:
             understanding = (
-                "لم نتمكن حالياً من العثور على حلول كافية مسجلة في قاعدة معرفة LifeFix لهذه المشكلة بالتحديد."
+                f"تم استرجاع خطوات عملية لحل المشكلة من قاعدة معرفة LifeFix "
+                f"بناءً على حالة مشابهة: {selected_problem.title}"
             )
             possible_causes = [
-                "المشكلة المذكورة قد تتطلب تفاصيل إضافية أو تقع خارج نطاق الحالات التجريبية المسجلة حالياً."
-            ]
-            steps = [
-                LifeFixSolutionStep(
-                    step_number=1,
-                    title="تحديد الأعراض والظروف المحيطة بالمشكلة",
-                    instruction="يرجى توضيح سياق المشكلة بالتفصيل والظروف التي تظهر فيها لمساعدتنا في توجيهك إلى الحل المناسب.",
-                    difficulty="easy",
-                    estimated_time_minutes=2,
-                )
+                f"عوامل شائعة مرتبطة بفئة {selected_problem.category}: {selected_problem.description}"
             ]
             explanations = [
-                "تحديد تفاصيل إضافية يساعد LifeFix في ربط المشكلة بمجالات المعرفة الصحيحة واقتراح حلول مخصصة."
+                "هذه الخطوات مستخرجة مباشرة من قاعدة المعرفة المعتمدة لدى LifeFix للتعامل مع هذا النوع من المشاكل اليومية."
             ]
             warnings_or_notes = [
-                "تنبيه: استجابة إرشادية أساسية نظراً لعدم توفر حالات مطابقة كافية في قاعدة المعرفة حالياً."
+                "تنبيه: تم إنشاء هذا الحل مباشرة من قاعدة معرفة LifeFix نظراً لتعذر الاتصال بمساعد الذكاء الاصطناعي في الوقت الحالي."
             ]
             follow_up_question = (
-                "ما هي تفاصيل الجهاز أو البرنامج أو الموقف الذي تواجه فيه هذه المشكلة؟"
+                "هل تود تزويدنا بتفاصيل إضافية حول بيئة العمل أو نوع الجهاز لتقديم مساعدة أدق؟"
             )
         else:
             understanding = (
-                "LifeFix does not currently have enough relevant knowledge recorded for this specific problem."
+                f"Retrieved practical problem-solving guidance directly from the LifeFix knowledge base "
+                f"based on: {selected_problem.title}"
             )
             possible_causes = [
-                "The issue may require additional context or fall outside the current development dataset."
+                f"Common factors associated with {selected_problem.category}: {selected_problem.description}"
+            ]
+            explanations = [
+                "These steps are retrieved directly from the verified LifeFix knowledge base for everyday problem solving."
+            ]
+            warnings_or_notes = [
+                "Note: This response was generated directly from the LifeFix knowledge base as the AI service is currently unavailable."
+            ]
+            follow_up_question = (
+                "Would you like to provide additional details about your specific setup or symptoms to refine these steps?"
+            )
+
+        return LifeFixSolutionResponse(
+            understanding=understanding,
+            possible_causes=possible_causes,
+            recommended_steps=steps,
+            explanations=explanations,
+            warnings_or_notes=warnings_or_notes,
+            follow_up_question=follow_up_question,
+            source_cases=source_cases,
+        )
+
+    def _build_cross_language_fallback(
+        self,
+        request: SolveProblemRequest,
+        problem: RAGProblemContext,
+        is_ar: bool,
+    ) -> LifeFixSolutionResponse:
+        """Construct a safe localized fallback when the matching case is in a different language."""
+        source_cases = [
+            LifeFixSourceCase(problem_id=problem.problem_id, title=problem.title)
+        ]
+
+        if is_ar:
+            understanding = (
+                f"تم العثور على حالة مطابقة في قاعدة معرفة LifeFix ('{problem.title}')، "
+                "ولكن خطوات الحل المسجلة حالياً متوفرة باللغة الإنجليزية."
+            )
+            possible_causes = [
+                f"عوامل مرتبطة بفئة {problem.category}: يرجى التحقق من الظروف المحيطة بالمشكلة والأعراض المباشرة."
             ]
             steps = [
                 LifeFixSolutionStep(
                     step_number=1,
-                    title="Identify Specific Symptoms and Context",
-                    instruction="Please clarify the circumstances in which this problem occurs and what components or applications are involved.",
+                    title="التحقق من الظروف المحيطة وتفاصيل المشكلة",
+                    instruction="يرجى مراجعة الظروف والعوامل المحيطة بالمشكلة بشكل مباشر للحد من تأثيرها، حيث تم حجب الترجمة الآلية غير المعتمدة حفاظاً على سلامة الإرشادات.",
+                    difficulty="easy",
+                    estimated_time_minutes=3,
+                )
+            ]
+            explanations = [
+                "تم رصد تطابق دلالي مع حالة معتمدة في قاعدة المعرفة، وتم تقديم إرشادات أولية آمنة بلغتك ريثما يتم تفعيل الترجمة المعتمدة."
+            ]
+            warnings_or_notes = [
+                "تنبيه: الحالة المشابهة في قاعدة المعرفة مسجلة باللغة الإنجليزية، ولم يتم نسخ نصوص أجنبية مباشرة حفاظاً على دقة وسلامة المحتوى."
+            ]
+            follow_up_question = (
+                "هل يمكنك تزويدنا بمزيد من التفاصيل باللغة العربية حول بيئة وظروف المشكلة؟"
+            )
+        else:
+            understanding = (
+                f"A similar verified case was identified in the LifeFix knowledge base ('{problem.title}'), "
+                "but its recorded solution steps are currently available in Arabic."
+            )
+            possible_causes = [
+                f"Factors associated with {problem.category}: please inspect the operational environment and immediate symptoms."
+            ]
+            steps = [
+                LifeFixSolutionStep(
+                    step_number=1,
+                    title="Inspect Environmental Conditions and Symptoms",
+                    instruction="Check the operating conditions and isolate contributing factors safely while native-language steps are prepared. Raw foreign text was omitted to preserve guidance accuracy.",
+                    difficulty="easy",
+                    estimated_time_minutes=3,
+                )
+            ]
+            explanations = [
+                "A semantic match was identified in our knowledge base, and safe initial guidance is provided in English rather than unverified machine translation."
+            ]
+            warnings_or_notes = [
+                "Note: The matching case in the knowledge base is recorded in Arabic. Raw foreign text was withheld to prevent translation inaccuracies."
+            ]
+            follow_up_question = (
+                "Could you provide additional details about your environment or equipment to assist further?"
+            )
+
+        return LifeFixSolutionResponse(
+            understanding=understanding,
+            possible_causes=possible_causes,
+            recommended_steps=steps,
+            explanations=explanations,
+            warnings_or_notes=warnings_or_notes,
+            follow_up_question=follow_up_question,
+            source_cases=source_cases,
+        )
+
+    def _build_low_confidence_response(
+        self,
+        request: SolveProblemRequest,
+        is_ar: bool,
+    ) -> LifeFixSolutionResponse:
+        """Construct a safe, exploratory response when no retrieved case meets confidence thresholds."""
+        if is_ar:
+            understanding = (
+                "لم نتمكن حالياً من العثور على حالة مطابقة بدرجة ثقة كافية في قاعدة معرفة LifeFix لهذه المشكلة بالتحديد."
+            )
+            possible_causes = [
+                "المشكلة المذكورة قد تتطلب تفاصيل أو تشخيصاً فنياً إضافياً، أو تقع خارج نطاق الحالات اليومية المسجلة حالياً."
+            ]
+            steps = [
+                LifeFixSolutionStep(
+                    step_number=1,
+                    title="توضيح الأعراض وسياق المشكلة بالتفصيل",
+                    instruction="يرجى تزويدنا بمزيد من التفاصيل حول ظروف المشكلة وسياق حدوثها، حيث لم يتم العثور على حالة مشابهة بدرجة كافية في قاعدة المعرفة.",
                     difficulty="easy",
                     estimated_time_minutes=2,
                 )
             ]
             explanations = [
-                "Providing additional context enables LifeFix to search related knowledge areas and offer tailored guidance."
+                "توضيح التفاصيل الدقيقة وسياق المشكلة يساعد LifeFix في تحديد الإرشادات الآمنة المناسبة."
             ]
             warnings_or_notes = [
-                "Note: Standard baseline guidance provided because no direct matching cases were found in the knowledge base."
+                "تنبيه: لم يتم العثور على حالة مطابقة بدرجة كافية في قاعدة المعرفة (لم يتم استيفاء حد الثقة). تم تقديم إرشادات استكشافية عامة."
             ]
             follow_up_question = (
-                "What specific device, software, or environment are you using when this occurs?"
+                "هل يمكنك تزويدنا بتفاصيل إضافية حول الظروف المحيطة بالمشكلة أو الجهاز المعني؟"
+            )
+        else:
+            understanding = (
+                "LifeFix does not currently have a sufficiently verified matching case in the knowledge base for this specific problem."
+            )
+            possible_causes = [
+                "The issue may require additional diagnostic context or falls outside our current verified problem knowledge base."
+            ]
+            steps = [
+                LifeFixSolutionStep(
+                    step_number=1,
+                    title="Clarify Specific Symptoms and Context",
+                    instruction="Please describe the exact circumstances, system, or conditions under which this occurs, as no sufficiently close match was found in the verified knowledge base.",
+                    difficulty="easy",
+                    estimated_time_minutes=2,
+                )
+            ]
+            explanations = [
+                "Providing specific symptoms and context allows LifeFix to search related everyday knowledge areas effectively."
+            ]
+            warnings_or_notes = [
+                "Note: No sufficiently similar case was found in the knowledge base (confidence threshold not met). Standard exploratory guidance provided."
+            ]
+            follow_up_question = (
+                "Could you provide more context or specific details about what you are observing?"
             )
 
         return LifeFixSolutionResponse(
@@ -312,14 +477,15 @@ class ProblemSolverService:
         try:
             effective_user = user if user is not None else self._get_guest_user(db)
 
-            # Determine best matching retrieved Problem ID if available
+            # Determine best matching retrieved Problem ID if available and confident
             original_problem_id: uuid.UUID | None = None
             if rag_context.retrieved_problems:
                 top_problem = rag_context.retrieved_problems[0]
-                try:
-                    original_problem_id = uuid.UUID(top_problem.problem_id)
-                except (ValueError, TypeError, AttributeError):
-                    original_problem_id = None
+                if top_problem.similarity_score >= self.min_confidence_threshold:
+                    try:
+                        original_problem_id = uuid.UUID(top_problem.problem_id)
+                    except (ValueError, TypeError, AttributeError):
+                        original_problem_id = None
 
             # Generate attempt UUID and associate with response before serializing
             attempt_id = uuid.uuid4()
@@ -389,12 +555,12 @@ class ProblemSolverService:
                 system_instruction=SYSTEM_INSTRUCTION,
             )
 
-            # Ensure source_cases is populated from RAG context if LLM left it empty
+            # Ensure source_cases is populated only with confident cases if LLM left it empty
             if not response.source_cases and rag_context.retrieved_problems:
                 response.source_cases = [
                     LifeFixSourceCase(problem_id=p.problem_id, title=p.title)
                     for p in rag_context.retrieved_problems
-                    if p.solutions
+                    if p.solutions and p.similarity_score >= self.min_confidence_threshold
                 ][:3]
 
         except (LLMServiceError, ValueError, Exception) as exc:
