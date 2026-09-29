@@ -192,7 +192,7 @@ export function HomePage() {
         {/* Welcome Section */}
         <section className="lifefix-home__hero" aria-labelledby="welcome-heading">
           <Badge variant="primary" className="lifefix-home__badge">
-            LifeFix — AI Personal Problem Solver
+            LifeFix · Personal Problem Solver
           </Badge>
           <h1 id="welcome-heading" className="lifefix-home__title">
             {solution ? "Your Personalized Solution" : "Describe what's going wrong."}
@@ -403,7 +403,7 @@ export function HomePage() {
               </div>
               <h2 className="lifefix-pillar-card__title">Structured Steps</h2>
               <p className="lifefix-pillar-card__description">
-                Clear, numbered guidance with estimated time and difficulty ratings instead of walls of chatbot text.
+                Clear, numbered guidance with estimated time and difficulty ratings, so you can focus on what to do next.
               </p>
             </div>
 

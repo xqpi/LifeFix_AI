@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import PageContainer from "../components/ui/PageContainer";
+import LifeFixLogo from "../components/ui/LifeFixLogo";
 import "./LoginPage.css";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -108,19 +109,8 @@ export function LoginPage() {
       <div className="lifefix-auth-container">
         {/* Header Icon & Branding */}
         <div className="lifefix-auth-header">
-          <div className="lifefix-auth-logo-badge" aria-hidden="true">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
+          <div className="lifefix-auth-logo-wrapper">
+            <LifeFixLogo variant="icon" size="lg" />
           </div>
           <h1 className="lifefix-auth-title">Welcome back to LifeFix</h1>
           <p className="lifefix-auth-subtitle">

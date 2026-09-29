@@ -1,6 +1,6 @@
 /* ==========================================================================
-   LifeFix Attempt Details Page Styles
-   Calm, structured solution viewer adhering to DESIGN.md
+   LifeFix Attempt Details Page Styles - Pearlescent Liquid Glass
+   Design System: LifeFix Pearlescent Holographic Style
    ========================================================================== */
 
 .lifefix-attempt-detail-page {
@@ -24,14 +24,62 @@
 
 /* Main Attempt Detail Article */
 .lifefix-attempt-detail {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.90);
+  border-radius: var(--radius-2xl);
+  box-shadow:
+    0 16px 48px rgba(126, 137, 202, 0.12),
+    0 2px 10px rgba(0, 0, 0, 0.02),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1);
   padding: var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  position: relative;
+}
+
+/* Subtle animated prismatic iridescent edge sheen (12s slow shift) */
+.lifefix-attempt-detail::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(141, 240, 236, 0.45) 20%,
+    rgba(253, 247, 168, 0.35) 40%,
+    rgba(255, 164, 224, 0.40) 65%,
+    rgba(204, 168, 253, 0.45) 85%,
+    rgba(152, 200, 254, 0.50) 100%
+  );
+  background-size: 200% 200%;
+  animation: lifefix-detail-shimmer 12s ease-in-out infinite alternate;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.90;
+}
+
+@keyframes lifefix-detail-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lifefix-attempt-detail::before {
+    animation: none !important;
+  }
 }
 
 @media (min-width: 640px) {
@@ -50,8 +98,10 @@
 
 /* Header Area */
 .lifefix-attempt-detail__header {
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid rgba(126, 137, 202, 0.14);
   padding-bottom: var(--space-5);
+  position: relative;
+  z-index: 1;
 }
 
 .lifefix-attempt-detail__meta-row {
@@ -94,10 +144,13 @@
 
 /* Section: Your Problem */
 .lifefix-attempt-detail__problem-section {
-  background-color: var(--color-background-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background-color: rgba(244, 246, 252, 0.70);
+  border: 1px solid rgba(126, 137, 202, 0.18);
+  border-radius: var(--radius-xl);
   padding: var(--space-5);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+  position: relative;
+  z-index: 1;
 }
 
 .lifefix-attempt-detail__section-header {
@@ -109,12 +162,12 @@
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
+  color: var(--color-brand-periwinkle);
 }
 
 .lifefix-attempt-detail__problem-text {
-  font-size: 15.5px;
+  font-size: 16px;
   line-height: 1.6;
   color: var(--color-text-primary);
   font-weight: 500;
@@ -125,7 +178,7 @@
 
 @media (min-width: 640px) {
   .lifefix-attempt-detail__problem-text {
-    font-size: 16.5px;
+    font-size: 17px;
   }
 }
 
@@ -134,12 +187,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  position: relative;
+  z-index: 1;
 }
 
 /* Feedback Section */
 .lifefix-attempt-detail__feedback-section {
   padding-top: var(--space-5);
-  border-top: 1px solid var(--color-border-subtle);
+  border-top: 1px solid rgba(126, 137, 202, 0.14);
 }
 
 .lifefix-attempt-detail__feedback-title {
@@ -151,9 +206,11 @@
 }
 
 .lifefix-attempt-detail__feedback-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.60);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: var(--radius-xl);
   padding: var(--space-5);
 }
 
@@ -185,16 +242,18 @@
 /* Refinement Section Integration */
 .lifefix-attempt-detail__refinement-wrapper {
   padding-top: var(--space-5);
-  border-top: 1px solid var(--color-border-subtle);
+  border-top: 1px solid rgba(126, 137, 202, 0.14);
 }
 
 /* Footer Navigation */
 .lifefix-attempt-detail__footer {
   padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border-subtle);
+  border-top: 1px solid rgba(126, 137, 202, 0.14);
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  position: relative;
+  z-index: 1;
 }
 
 .lifefix-attempt-detail--rtl .lifefix-attempt-detail__footer {
@@ -209,9 +268,9 @@
 }
 
 .lifefix-attempt-skeleton-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.50);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+  border-radius: var(--radius-2xl);
   padding: var(--space-6);
 }
 
@@ -222,17 +281,17 @@
 }
 
 .lifefix-attempt-skeleton-bar {
-  background-color: var(--color-background-subtle);
+  background-color: rgba(126, 137, 202, 0.12);
   border-radius: var(--radius-sm);
   animation: lifefix-attempt-pulse 1.4s ease-in-out infinite;
 }
 
 @keyframes lifefix-attempt-pulse {
   0%, 100% {
-    opacity: 0.6;
+    opacity: 0.5;
   }
   50% {
-    opacity: 1;
+    opacity: 0.9;
   }
 }
 
@@ -240,10 +299,12 @@
 .lifefix-attempt-detail__empty {
   text-align: center;
   padding: var(--space-12) var(--space-6);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 12px 36px rgba(126, 137, 202, 0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,16 +312,16 @@
 }
 
 .lifefix-attempt-detail__empty-icon {
-  width: 56px;
-  height: 56px;
+  width: 58px;
+  height: 58px;
   border-radius: var(--radius-full);
-  background-color: var(--color-error-soft);
-  color: var(--color-error);
+  background-color: rgba(239, 68, 68, 0.10);
+  color: #EF4444;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-4);
-  border: 1px solid var(--color-error-border);
+  border: 1px solid rgba(239, 68, 68, 0.25);
 }
 
 .lifefix-attempt-detail__empty-title {
@@ -275,22 +336,24 @@
   font-size: 14.5px;
   color: var(--color-text-muted);
   max-width: 440px;
-  line-height: 1.55;
+  line-height: 1.6;
   margin: 0 0 var(--space-6) 0;
 }
 
 /* Error State */
 .lifefix-attempt-detail__error {
-  background-color: var(--color-error-soft);
-  border: 1px solid var(--color-error-border);
-  color: var(--color-error);
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #DC2626;
   padding: var(--space-5);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   font-size: 14px;
   line-height: 1.5;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 @media (min-width: 640px) {

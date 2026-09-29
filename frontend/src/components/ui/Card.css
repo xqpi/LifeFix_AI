@@ -1,34 +1,107 @@
+/* ==========================================================================
+   Card Component - Transparent Frosted Liquid Glass
+   Design System: LifeFix Pearlescent Holographic Style
+   ========================================================================== */
+
 .lifefix-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
-  padding: var(--space-5);
+  position: relative;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 14px 40px rgba(126, 137, 202, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.02),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
   transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal),
+    border-color var(--transition-normal),
+    background-color var(--transition-normal);
+}
+
+/* Subtle animated prismatic iridescent edge highlight (12s slow shift) */
+.lifefix-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.2px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(141, 240, 236, 0.45) 20%,
+    rgba(253, 247, 168, 0.35) 40%,
+    rgba(255, 164, 224, 0.40) 65%,
+    rgba(204, 168, 253, 0.45) 85%,
+    rgba(152, 200, 254, 0.50) 100%
+  );
+  background-size: 200% 200%;
+  animation: lifefix-card-shimmer 12s ease-in-out infinite alternate;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+@keyframes lifefix-card-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lifefix-card::before {
+    animation: none !important;
+  }
+}
+
+/* Density Variants */
+.lifefix-card--sm {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.lifefix-card--md {
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+}
+
+.lifefix-card--lg {
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+}
+
+@media (min-width: 640px) {
+  .lifefix-card--lg {
+    padding: var(--space-8);
+  }
 }
 
 .lifefix-card--xl {
-  border-radius: var(--radius-xl);
   padding: var(--space-6);
+  border-radius: var(--radius-2xl);
 }
 
-.lifefix-card--elevated {
-  box-shadow: var(--shadow-sm);
+@media (min-width: 640px) {
+  .lifefix-card--xl {
+    padding: var(--space-10);
+  }
 }
 
-.lifefix-card--subtle {
-  background-color: var(--color-background-subtle);
-  border-color: var(--color-border-subtle);
-  box-shadow: none;
-}
-
-.lifefix-card--interactive {
-  cursor: pointer;
-}
-
-.lifefix-card--interactive:hover {
-  border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-sm);
+/* Elevated Hover Variant */
+.lifefix-card--elevated:hover {
+  background: rgba(255, 255, 255, 0.78);
+  transform: translateY(-2px);
+  box-shadow:
+    0 18px 48px rgba(126, 137, 202, 0.16),
+    0 4px 16px rgba(141, 240, 236, 0.25),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1);
 }

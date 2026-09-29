@@ -1,14 +1,20 @@
+/* ==========================================================================
+   Header Component - Frosted Pearlescent Liquid Glass
+   Design System: LifeFix Pearlescent Holographic Style
+   ========================================================================== */
+
 .lifefix-header {
   position: sticky;
   top: 0;
   z-index: 50;
   width: 100%;
   height: var(--header-height-desktop);
-  background-color: rgba(248, 249, 250, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--color-border);
-  transition: border-color var(--transition-fast);
+  background-color: rgba(253, 252, 248, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 24px rgba(126, 137, 202, 0.08);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 @media (max-width: 639px) {
@@ -44,55 +50,9 @@
 }
 
 .lifefix-header__brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
   text-decoration: none;
-  color: var(--color-text-primary);
-}
-
-.lifefix-header__logo-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-primary-border);
-  flex-shrink: 0;
-}
-
-.lifefix-header__wordmark {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--color-text-primary);
-  line-height: 1;
-}
-
-.lifefix-header__wordmark-dot {
-  color: var(--color-primary);
-}
-
-.lifefix-header__tagline {
-  display: none;
-}
-
-@media (min-width: 640px) {
-  .lifefix-header__tagline {
-    display: inline-flex;
-    align-items: center;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--color-text-muted);
-    background-color: var(--color-background-subtle);
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--color-border);
-    margin-left: var(--space-1);
-  }
 }
 
 .lifefix-header__actions {
@@ -101,17 +61,21 @@
   gap: var(--space-3);
 }
 
+/* Service Status Indicator */
 .lifefix-header__status {
   display: none;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--color-text-muted);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  padding: 3px 10px;
+  color: var(--color-text-secondary);
+  background-color: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  padding: 4px 12px;
   border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(126, 137, 202, 0.06);
 }
 
 @media (min-width: 768px) {
@@ -125,6 +89,7 @@
   height: 7px;
   border-radius: 50%;
   background-color: var(--color-success);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
 /* Authentication Header Styles */
@@ -136,16 +101,16 @@
 
 .lifefix-header__skeleton {
   width: 80px;
-  height: 28px;
-  background-color: var(--color-background-subtle);
-  border: 1px solid var(--color-border);
+  height: 30px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: var(--radius-full);
   animation: lifefix-skeleton-pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes lifefix-skeleton-pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.9; }
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 .lifefix-header__auth-links {
@@ -155,35 +120,39 @@
 }
 
 .lifefix-header__signin-link {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--color-text-secondary);
   text-decoration: none;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: var(--radius-md);
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+  border: 1px solid transparent;
+  transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .lifefix-header__signin-link:hover {
-  color: var(--color-text-primary);
-  background-color: var(--color-background-subtle);
+  color: var(--color-brand-periwinkle);
+  background-color: rgba(126, 137, 202, 0.08);
+  border-color: rgba(126, 137, 202, 0.18);
 }
 
 .lifefix-header__signup-btn {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--color-text-inverse);
-  background-color: var(--color-primary);
+  color: #FFFFFF;
+  background: var(--color-brand-periwinkle);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   text-decoration: none;
-  padding: 6px 14px;
+  padding: 6px 16px;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xs);
-  transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 4px 14px rgba(126, 137, 202, 0.35);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
 }
 
 .lifefix-header__signup-btn:hover {
-  background-color: var(--color-primary-hover);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--color-brand-periwinkle-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(126, 137, 202, 0.45), 0 0 12px rgba(199, 243, 246, 0.4);
 }
 
 .lifefix-header__user-menu {
@@ -196,29 +165,32 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 3px 10px 3px 4px;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  padding: 3px 12px 3px 4px;
+  background-color: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(126, 137, 202, 0.08);
 }
 
 .lifefix-header__user-avatar {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-size: 11px;
+  background: linear-gradient(135deg, var(--color-brand-periwinkle) 0%, var(--color-brand-blue) 100%);
+  color: #FFFFFF;
+  font-size: 11.5px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--color-primary-border);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   flex-shrink: 0;
 }
 
 .lifefix-header__user-name {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--color-text-primary);
   max-width: 120px;
@@ -229,31 +201,33 @@
 
 .lifefix-header__logout-btn {
   font-size: 12px;
-  padding: 4px 8px;
+  padding: 4px 10px;
   color: var(--color-text-muted);
 }
 
 .lifefix-header__logout-btn:hover {
   color: var(--color-error);
+  background-color: rgba(239, 68, 68, 0.08);
 }
 
 .lifefix-header__history-link {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--color-text-secondary);
   text-decoration: none;
-  padding: 5px 10px;
+  padding: 5px 12px;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .lifefix-header__history-link:hover {
-  color: var(--color-primary);
-  background-color: var(--color-primary-soft);
+  color: var(--color-brand-periwinkle);
+  background-color: rgba(126, 137, 202, 0.08);
+  border-color: rgba(126, 137, 202, 0.18);
 }
 
 .lifefix-header__history-link:focus-visible {
@@ -262,7 +236,8 @@
 }
 
 .lifefix-header__history-link--active {
-  color: var(--color-primary);
-  background-color: var(--color-primary-soft);
-  border-color: var(--color-primary-border);
+  color: var(--color-brand-periwinkle);
+  background: rgba(126, 137, 202, 0.12);
+  border-color: rgba(126, 137, 202, 0.3);
+  box-shadow: 0 0 12px rgba(126, 137, 202, 0.15);
 }

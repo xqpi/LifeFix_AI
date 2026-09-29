@@ -1,68 +1,104 @@
 /* ==========================================================================
    LifeFix Global Design System & Token Foundation
-   Source of Truth: DESIGN.md (Version 1.0)
+   Theme: Pearlescent Holographic / Iridescent Foil / Liquid Glass
+   Directly Inspired by Reference: Flowing 3D Pearlescent Liquid Glass with
+   Prismatic Rainbow Caustics & Specular Highlights
    ========================================================================== */
 
 :root {
   /* ------------------------------------------------------------------------
-     1. Brand & Accents (Intelligent Iris / Purple Accent)
+     1. Brand & Iridescent Holographic Foundation
      ------------------------------------------------------------------------ */
-  --color-primary: #4F46E5;            /* Iris 600: Calm, focused accent */
-  --color-primary-hover: #4338CA;      /* Iris 700: Hover state */
-  --color-primary-active: #3730A3;     /* Iris 800: Pressed state */
-  --color-primary-soft: #EEF2FF;       /* Iris 50: Soft tinted chip/badge background */
-  --color-primary-border: #C7D2FE;     /* Iris 200: Subtle focus & highlight border */
+  --color-brand-pearl: #FDFCF8;
+  --color-brand-pearl-tint: #F3F5FA;
+  --color-brand-periwinkle: #7E89CA;
+  --color-brand-periwinkle-hover: #6B77BD;
+  --color-brand-periwinkle-active: #5864AC;
+  --color-brand-blue: #A4C6E8;
+  --color-brand-cyan: #C7F3F6;
+  --color-brand-pink: #FFD9FF;
+
+  /* Prismatic Spectral Caustic Highlights (Refracting through liquid glass) */
+  --color-caustic-cyan: #8DF0EC;
+  --color-caustic-yellow: #FDF7A8;
+  --color-caustic-peach: #FFCDB5;
+  --color-caustic-pink: #FFA4E0;
+  --color-caustic-violet: #CCA8FD;
+  --color-caustic-blue: #98C8FE;
+
+  /* Primary Interactive Tokens (Periwinkle Base with Soft Sheen) */
+  --color-primary: #7E89CA;
+  --color-primary-hover: #6B77BD;
+  --color-primary-active: #5864AC;
+  --color-primary-light: #A4C6E8;
+  --color-primary-soft: rgba(126, 137, 202, 0.12);
+  --color-primary-border: rgba(126, 137, 202, 0.28);
 
   /* ------------------------------------------------------------------------
-     2. Canvas & Base Surfaces (60% Neutral Canvas)
+     2. Canvas & Base Surfaces (Luminous Pearl White & Frosted Glass)
      ------------------------------------------------------------------------ */
-  --color-background: #F8F9FA;         /* Soft warm-tinted off-white canvas */
-  --color-background-subtle: #F1F3F5;  /* Secondary background for containers */
-  --color-surface: #FFFFFF;            /* Pure white for cards, panels, inputs */
-  --color-surface-elevated: #FFFFFF;   /* Raised surface for dropdowns, tooltips */
+  --color-background: #FDFCF8;         /* Luminous pearl white background */
+  --color-background-subtle: #F4F6FC;  /* Subtle tinted pearl white */
+
+  /* Translucent frosted liquid glass surfaces (backdrop blur 24-32px) */
+  --color-surface: rgba(255, 255, 255, 0.65);
+  --color-surface-hover: rgba(255, 255, 255, 0.82);
+  --color-surface-elevated: rgba(255, 255, 255, 0.78);
+  --color-surface-subtle: rgba(255, 255, 255, 0.45);
+  --color-surface-input: rgba(255, 255, 255, 0.75);
 
   /* ------------------------------------------------------------------------
-     3. Typography Colors (30% Structural Content)
+     3. Typography Colors (Crisp, High Contrast on Luminous Pearl)
      ------------------------------------------------------------------------ */
-  --color-text-primary: #111827;       /* Dark charcoal for high contrast headings */
-  --color-text-secondary: #4B5563;     /* Muted slate for instructions, body text */
-  --color-text-muted: #6B7280;         /* Neutral gray for captions, metadata */
-  --color-text-inverse: #FFFFFF;       /* High contrast white on primary buttons */
+  --color-text-primary: #1A1F36;       /* Deep slate navy for maximum legibility */
+  --color-text-secondary: #4E5574;     /* Refined neutral slate for readable descriptions */
+  --color-text-muted: #7E85A4;         /* Soft muted slate for captions, metadata, tags */
+  --color-text-inverse: #FFFFFF;       /* Pure white for primary buttons & active chips */
 
   /* ------------------------------------------------------------------------
-     4. Borders & Dividers
+     4. Glass Borders & Iridescent Refraction Sheens
      ------------------------------------------------------------------------ */
-  --color-border: #E5E7EB;             /* Crisp 1px hairline border */
-  --color-border-subtle: #F3F4F6;      /* Faint interior divider lines */
-  --color-border-hover: #D1D5DB;       /* Interactive element hover border */
-  --color-border-focus: #4F46E5;       /* Focus ring accent border */
+  --color-border: rgba(126, 137, 202, 0.18);
+  --color-border-subtle: rgba(126, 137, 202, 0.10);
+  --color-border-hover: rgba(126, 137, 202, 0.38);
+  --color-border-focus: #7E89CA;
+
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-border-subtle: rgba(255, 255, 255, 0.65);
+  --glass-border-iridescent: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(141, 240, 236, 0.45) 20%,
+    rgba(253, 247, 168, 0.35) 40%,
+    rgba(255, 164, 224, 0.40) 65%,
+    rgba(204, 168, 253, 0.45) 85%,
+    rgba(152, 200, 254, 0.50) 100%
+  );
+  --glass-blur: blur(28px);
+  --glass-blur-sm: blur(16px);
 
   /* ------------------------------------------------------------------------
-     5. Semantics (10% Purposeful Accents)
+     5. Semantics (Refined Pearlescent Accents)
      ------------------------------------------------------------------------ */
-  /* Success Semantic Role */
-  --color-success: #059669;            /* Emerald 600: Verified resolutions */
-  --color-success-hover: #047857;      /* Emerald 700 */
-  --color-success-soft: #ECFDF5;       /* Emerald 50: Success backgrounds */
-  --color-success-border: #A7F3D0;     /* Emerald 200 */
+  --color-success: #10B981;
+  --color-success-hover: #059669;
+  --color-success-soft: rgba(16, 185, 129, 0.12);
+  --color-success-border: rgba(16, 185, 129, 0.28);
 
-  /* Warning Semantic Role */
-  --color-warning: #D97706;            /* Amber 600: Cautionary warnings */
-  --color-warning-soft: #FFFBEB;       /* Amber 50: Callout backgrounds */
-  --color-warning-border: #FDE68A;     /* Amber 200 */
+  --color-warning: #D97706;
+  --color-warning-soft: rgba(217, 119, 6, 0.10);
+  --color-warning-border: rgba(217, 119, 6, 0.26);
 
-  /* Error Semantic Role */
-  --color-error: #DC2626;              /* Red 600: Validation & errors */
-  --color-error-soft: #FEF2F2;         /* Red 50: Error backgrounds */
-  --color-error-border: #FECACA;       /* Red 200 */
+  --color-error: #EF4444;
+  --color-error-soft: rgba(239, 68, 68, 0.10);
+  --color-error-border: rgba(239, 68, 68, 0.26);
 
-  /* Info / Knowledge Attribution Semantic Role */
-  --color-info: #2563EB;               /* Blue 600: RAG case indicators */
-  --color-info-soft: #EFF6FF;          /* Blue 50: Source case backgrounds */
-  --color-info-border: #BFDBFE;        /* Blue 200 */
+  --color-info: #7E89CA;
+  --color-info-soft: rgba(126, 137, 202, 0.12);
+  --color-info-border: rgba(126, 137, 202, 0.28);
 
   /* ------------------------------------------------------------------------
-     6. Spacing Scale (8px Modular Grid with 4px Half-step)
+     6. Spacing Scale (8px Modular Grid)
      ------------------------------------------------------------------------ */
   --space-1: 4px;
   --space-2: 8px;
@@ -76,45 +112,57 @@
   --space-16: 64px;
 
   /* ------------------------------------------------------------------------
-     7. Border Radii
+     7. Border Radii (20–28px Bubbly Geometry)
      ------------------------------------------------------------------------ */
-  --radius-xs: 4px;                    /* Inner tags, compact badges, case IDs */
-  --radius-sm: 6px;                    /* Small buttons, tooltips */
-  --radius-md: 8px;                    /* Standard buttons, search bars */
-  --radius-lg: 12px;                   /* Solution step items, callout boxes */
-  --radius-xl: 16px;                   /* Problem input box, main solution card */
-  --radius-full: 9999px;               /* Pill badges, status indicator dots */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
 
   /* ------------------------------------------------------------------------
-     8. Elevation & Ambient Shadows
+     8. Pearlescent Glass Elevation & Specular Rim Reflections
      ------------------------------------------------------------------------ */
   --shadow-none: none;
-  --shadow-xs: 0 1px 2px rgba(17, 24, 39, 0.04);
-  --shadow-sm: 0 1px 3px rgba(17, 24, 39, 0.06), 0 1px 2px rgba(17, 24, 39, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(17, 24, 39, 0.06), 0 2px 4px -2px rgba(17, 24, 39, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(17, 24, 39, 0.08), 0 4px 6px -4px rgba(17, 24, 39, 0.03);
+  --shadow-xs: 0 2px 8px rgba(126, 137, 202, 0.08);
+  --shadow-sm: 0 4px 16px rgba(126, 137, 202, 0.10);
+  --shadow-md: 0 8px 28px rgba(126, 137, 202, 0.12);
+  --shadow-lg: 0 16px 44px rgba(126, 137, 202, 0.16);
+
+  /* Frosted Glass Shadow with top highlight rim */
+  --shadow-glass:
+    0 14px 40px rgba(126, 137, 202, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.02),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
+  --shadow-glass-hover:
+    0 18px 48px rgba(126, 137, 202, 0.16),
+    0 4px 16px rgba(141, 240, 236, 0.25),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1);
+  --shadow-glow-periwinkle: 0 4px 18px rgba(126, 137, 202, 0.35);
 
   /* ------------------------------------------------------------------------
      9. Transitions & Micro-Interactions
      ------------------------------------------------------------------------ */
-  --transition-fast: 120ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-normal: 200ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-slow: 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 140ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 360ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ------------------------------------------------------------------------
-     10. Fonts & Typography Stacks
+     10. Typography Stacks
      ------------------------------------------------------------------------ */
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-arabic: 'Noto Sans Arabic', 'Cairo', sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 
   /* ------------------------------------------------------------------------
-     11. Layout Constraints & Breakpoints
+     11. Layout Constraints
      ------------------------------------------------------------------------ */
-  --max-w-spine: 768px;                /* Focused single-column reading spine */
-  --max-w-header: 1024px;              /* Top navigation container width */
-  --header-height-desktop: 60px;
-  --header-height-mobile: 56px;
+  --max-w-spine: 768px;
+  --max-w-header: 1024px;
+  --header-height-desktop: 68px;
+  --header-height-mobile: 60px;
 }
 
 /* ==========================================================================
@@ -133,6 +181,8 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   tab-size: 4;
+  background-color: var(--color-background);
+  color-scheme: light;
 }
 
 body {
@@ -140,10 +190,11 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-background);
   color: var(--color-text-primary);
-  line-height: 1.55;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 #root {
@@ -152,7 +203,6 @@ body {
   flex-direction: column;
 }
 
-/* Inherit font families for form inputs */
 input,
 button,
 textarea,
@@ -162,19 +212,16 @@ select {
   color: inherit;
 }
 
-/* High-accessibility visible focus rings */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* Purposeful selection styling */
 ::selection {
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  background-color: rgba(126, 137, 202, 0.25);
+  color: var(--color-text-primary);
 }
 
-/* Accessible reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -186,7 +233,6 @@ select {
   }
 }
 
-/* Accessible screen-reader only utility */
 .sr-only {
   position: absolute;
   width: 1px;

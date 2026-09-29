@@ -1,3 +1,8 @@
+/* ==========================================================================
+   LifeFix Auth Pages (Login & Register) - Pearlescent Liquid Glass
+   Design System: LifeFix Pearlescent Holographic Style
+   ========================================================================== */
+
 .lifefix-auth-page {
   padding-top: var(--space-8);
   padding-bottom: var(--space-12);
@@ -21,39 +26,86 @@
   gap: var(--space-2);
 }
 
-.lifefix-auth-logo-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-primary-border);
+.lifefix-auth-logo-wrapper {
   margin-bottom: var(--space-2);
+  filter: drop-shadow(0 4px 16px rgba(126, 137, 202, 0.25));
+  transition: transform var(--transition-normal);
+}
+
+.lifefix-auth-logo-wrapper:hover {
+  transform: scale(1.05);
 }
 
 .lifefix-auth-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--color-text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1.25;
 }
 
 .lifefix-auth-subtitle {
-  font-size: 14px;
+  font-size: 14.5px;
   color: var(--color-text-secondary);
-  line-height: 1.5;
+  line-height: 1.55;
+  max-width: 380px;
 }
 
+/* Centered Pearlescent Glass Authentication Card */
 .lifefix-auth-card {
   padding: var(--space-8) var(--space-6);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255, 255, 255, 0.90);
+  border-radius: var(--radius-2xl);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  box-shadow:
+    0 16px 48px rgba(126, 137, 202, 0.12),
+    0 2px 10px rgba(0, 0, 0, 0.02),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1);
+  position: relative;
+}
+
+/* Subtle animated prismatic iridescent edge sheen (12s slow shift) */
+.lifefix-auth-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(141, 240, 236, 0.45) 20%,
+    rgba(253, 247, 168, 0.35) 40%,
+    rgba(255, 164, 224, 0.40) 65%,
+    rgba(204, 168, 253, 0.45) 85%,
+    rgba(152, 200, 254, 0.50) 100%
+  );
+  background-size: 200% 200%;
+  animation: lifefix-auth-shimmer 12s ease-in-out infinite alternate;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.90;
+}
+
+@keyframes lifefix-auth-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lifefix-auth-card::before {
+    animation: none !important;
+  }
 }
 
 @media (min-width: 640px) {
@@ -67,23 +119,28 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background-color: var(--color-error-soft);
-  border: 1px solid var(--color-error-border);
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: var(--radius-md);
-  color: var(--color-error);
-  font-size: 13px;
-  line-height: 1.4;
+  color: #DC2626;
+  font-size: 13.5px;
+  line-height: 1.45;
   margin-bottom: var(--space-5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .lifefix-auth-error-banner svg {
   flex-shrink: 0;
+  color: #EF4444;
 }
 
 .lifefix-auth-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  position: relative;
+  z-index: 1;
 }
 
 .lifefix-form-group {
@@ -93,42 +150,55 @@
 }
 
 .lifefix-form-label {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
 }
 
 .lifefix-form-input {
   width: 100%;
-  height: 44px;
+  height: 46px;
   padding: 0 var(--space-4);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(126, 137, 202, 0.22);
   border-radius: var(--radius-md);
   color: var(--color-text-primary);
-  font-size: 14px;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  font-size: 14.5px;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.lifefix-form-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.lifefix-form-input:hover:not(:disabled) {
+  border-color: rgba(126, 137, 202, 0.40);
+  background-color: #FFFFFF;
 }
 
 .lifefix-form-input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-soft);
+  background-color: #FFFFFF;
+  border-color: var(--color-brand-periwinkle);
+  box-shadow: 0 0 0 3px rgba(126, 137, 202, 0.18);
 }
 
 .lifefix-form-input:disabled {
-  background-color: var(--color-background-subtle);
+  background-color: rgba(244, 246, 252, 0.6);
   color: var(--color-text-muted);
   cursor: not-allowed;
 }
 
 .lifefix-form-input--invalid {
-  border-color: var(--color-error);
+  border-color: #EF4444;
 }
 
 .lifefix-form-input--invalid:focus {
-  border-color: var(--color-error);
-  box-shadow: 0 0 0 3px var(--color-error-soft);
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
 }
 
 /* Accessible Password Input with Show/Hide Toggle */
@@ -163,17 +233,17 @@
 
 .lifefix-password-toggle:hover {
   color: var(--color-text-primary);
-  background-color: var(--color-background-subtle);
+  background-color: rgba(126, 137, 202, 0.08);
 }
 
 .lifefix-password-toggle:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-brand-periwinkle);
   outline-offset: 1px;
 }
 
 .lifefix-form-field-error {
   font-size: 12px;
-  color: var(--color-error);
+  color: #DC2626;
   line-height: 1.4;
   display: flex;
   align-items: center;
@@ -197,19 +267,21 @@
   align-items: center;
   gap: var(--space-3);
   margin: var(--space-6) 0 var(--space-5);
+  position: relative;
+  z-index: 1;
 }
 
 .lifefix-auth-divider-line {
   flex: 1;
   height: 1px;
-  background-color: var(--color-border);
+  background-color: rgba(126, 137, 202, 0.14);
 }
 
 .lifefix-auth-divider-text {
   font-size: 12px;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .lifefix-auth-secondary-actions {
@@ -218,22 +290,25 @@
   align-items: center;
   gap: var(--space-3);
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .lifefix-auth-switch {
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--color-text-secondary);
 }
 
 .lifefix-auth-link {
-  color: var(--color-primary);
+  color: var(--color-brand-periwinkle);
   font-weight: 600;
   text-decoration: none;
+  transition: color var(--transition-fast);
 }
 
 .lifefix-auth-link:hover {
   text-decoration: underline;
-  color: var(--color-primary-hover);
+  color: var(--color-brand-periwinkle-hover);
 }
 
 .lifefix-auth-guest-option {
@@ -241,7 +316,7 @@
 }
 
 .lifefix-auth-guest-link {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text-muted);
   text-decoration: none;
@@ -249,5 +324,5 @@
 }
 
 .lifefix-auth-guest-link:hover {
-  color: var(--color-text-primary);
+  color: var(--color-brand-periwinkle);
 }

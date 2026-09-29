@@ -1,3 +1,8 @@
+/* ==========================================================================
+   Badge Component - Pearlescent Frosted Glass Badges
+   Design System: LifeFix Pearlescent Holographic Style
+   ========================================================================== */
+
 .lifefix-badge {
   display: inline-flex;
   align-items: center;
@@ -7,15 +12,17 @@
   line-height: 1.4;
   font-weight: 500;
   letter-spacing: 0.01em;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
   border: 1px solid transparent;
   white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .lifefix-badge--sm {
   font-size: 11px;
-  padding: 1px 6px;
+  padding: 2px 7px;
 }
 
 .lifefix-badge--square {
@@ -24,42 +31,43 @@
 
 /* Default / Neutral Variant */
 .lifefix-badge--default {
-  background-color: var(--color-background-subtle);
+  background-color: rgba(126, 137, 202, 0.10);
   color: var(--color-text-secondary);
-  border-color: var(--color-border);
+  border-color: rgba(126, 137, 202, 0.22);
 }
 
-/* Primary Iris Variant */
+/* Primary Periwinkle Variant */
 .lifefix-badge--primary {
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
-  border-color: var(--color-primary-border);
+  background-color: rgba(126, 137, 202, 0.16);
+  color: var(--color-brand-periwinkle);
+  border-color: rgba(126, 137, 202, 0.35);
+  font-weight: 600;
 }
 
 /* Success Emerald Variant */
 .lifefix-badge--success {
-  background-color: var(--color-success-soft);
-  color: var(--color-success);
-  border-color: var(--color-success-border);
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.28);
 }
 
 /* Warning Amber Variant */
 .lifefix-badge--warning {
-  background-color: var(--color-warning-soft);
-  color: var(--color-warning);
-  border-color: var(--color-warning-border);
+  background-color: rgba(217, 119, 6, 0.12);
+  color: #B45309;
+  border-color: rgba(217, 119, 6, 0.28);
 }
 
 /* Error Rose Variant */
 .lifefix-badge--error {
-  background-color: var(--color-error-soft);
-  color: var(--color-error);
-  border-color: var(--color-error-border);
+  background-color: rgba(239, 68, 68, 0.10);
+  color: #DC2626;
+  border-color: rgba(239, 68, 68, 0.26);
 }
 
-/* Info Blue Variant */
+/* Info Soft Blue Variant */
 .lifefix-badge--info {
-  background-color: var(--color-info-soft);
-  color: var(--color-info);
-  border-color: var(--color-info-border);
+  background-color: rgba(164, 198, 232, 0.20);
+  color: #3B5B8C;
+  border-color: rgba(164, 198, 232, 0.40);
 }

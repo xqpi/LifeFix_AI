@@ -1,24 +1,72 @@
 /* ==========================================================================
-   Solution Document Experience
-   Design System: DESIGN.md Section 11 & Section 20
+   Solution Document Experience - Pearlescent Liquid Glass
+   Design System: LifeFix Pearlescent Holographic Style
    ========================================================================== */
 
 .lifefix-solution-doc {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.90);
+  border-radius: var(--radius-2xl);
+  box-shadow:
+    0 16px 48px rgba(126, 137, 202, 0.12),
+    0 2px 10px rgba(0, 0, 0, 0.02),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1);
   padding: var(--space-6);
   transition: box-shadow var(--transition-normal);
+  position: relative;
 }
 
-@media (max-width: 639px) {
+/* Subtle animated prismatic iridescent edge highlight (12s slow shift) */
+.lifefix-solution-doc::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(141, 240, 236, 0.45) 20%,
+    rgba(253, 247, 168, 0.35) 40%,
+    rgba(255, 164, 224, 0.40) 65%,
+    rgba(204, 168, 253, 0.45) 85%,
+    rgba(152, 200, 254, 0.50) 100%
+  );
+  background-size: 200% 200%;
+  animation: lifefix-doc-shimmer 12s ease-in-out infinite alternate;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.90;
+}
+
+@keyframes lifefix-doc-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lifefix-solution-doc::before {
+    animation: none !important;
+  }
+}
+
+@media (min-width: 640px) {
   .lifefix-solution-doc {
-    padding: var(--space-4);
-    gap: var(--space-5);
+    padding: var(--space-8);
+    gap: var(--space-8);
   }
 }
 
@@ -38,17 +86,20 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid rgba(126, 137, 202, 0.14);
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
 }
 
 .lifefix-solution-doc__problem-badge {
   flex: 1 1 280px;
-  background-color: var(--color-background-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  background-color: rgba(244, 246, 252, 0.65);
+  border: 1px solid rgba(126, 137, 202, 0.20);
+  border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-4);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .lifefix-solution-doc__badge-top {
@@ -63,20 +114,19 @@
 .lifefix-solution-doc__badge-label {
   display: block;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
+  color: var(--color-brand-periwinkle);
 }
 
 .lifefix-solution-doc__lineage-badge {
   font-size: 11px;
 }
 
-
 .lifefix-solution-doc__problem-text {
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.55;
   color: var(--color-text-primary);
   font-weight: 500;
   white-space: pre-wrap;
@@ -104,47 +154,57 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  position: relative;
+  z-index: 1;
 }
 
 /* ==========================================================================
-   1. Understanding Banner (DESIGN.md Section 11A)
+   1. Understanding Banner (Iridescent Refraction Panel)
    ========================================================================== */
 
 .lifefix-understanding-banner {
-  background-color: var(--color-background-subtle);
-  border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-primary);
-  border-radius: var(--radius-md);
-  padding: 16px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(141, 240, 236, 0.25) 0%,
+    rgba(253, 247, 168, 0.18) 35%,
+    rgba(255, 164, 224, 0.22) 70%,
+    rgba(204, 168, 253, 0.25) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.90);
+  border-left: 4px solid var(--color-brand-periwinkle);
+  border-radius: var(--radius-xl);
+  padding: 18px 22px;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  box-shadow: 0 4px 18px rgba(126, 137, 202, 0.08);
 }
 
 .lifefix-understanding-banner--rtl {
-  border-left: 1px solid var(--color-border);
-  border-right: 3px solid var(--color-primary);
+  border-left: 1px solid rgba(255, 255, 255, 0.90);
+  border-right: 4px solid var(--color-brand-periwinkle);
 }
 
 .lifefix-understanding-banner__header {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-primary);
+  color: var(--color-brand-periwinkle);
 }
 
 .lifefix-understanding-banner__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-brand-periwinkle);
 }
 
 .lifefix-understanding-banner__title {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-primary);
+  letter-spacing: 0.06em;
+  color: var(--color-brand-periwinkle);
   margin: 0;
 }
 
@@ -157,7 +217,7 @@
 }
 
 /* ==========================================================================
-   2. Possible Causes Module (DESIGN.md Section 11B)
+   2. Possible Causes Module (Frosted Glass Items)
    ========================================================================== */
 
 .lifefix-causes-section {
@@ -184,19 +244,22 @@
 .lifefix-cause-item {
   display: flex;
   align-items: baseline;
-  gap: var(--space-2);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
+  gap: var(--space-3);
+  background-color: rgba(255, 255, 255, 0.60);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--color-text-secondary);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(126, 137, 202, 0.05);
 }
 
 .lifefix-cause-item__bullet {
-  color: var(--color-primary);
-  font-size: 16px;
+  color: var(--color-brand-periwinkle);
+  font-size: 18px;
   line-height: 1;
   flex-shrink: 0;
 }
@@ -207,17 +270,17 @@
 }
 
 /* ==========================================================================
-   3. Action Steps (DESIGN.md Section 11C)
+   3. Action Steps (Scannable Frosted Glass Cards with Periwinkle Badges)
    ========================================================================== */
 
 .lifefix-solution-steps {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 .lifefix-solution-steps__title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--color-text-primary);
   letter-spacing: -0.01em;
@@ -228,26 +291,36 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .lifefix-step-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: var(--radius-xl);
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  box-shadow: var(--shadow-xs);
+  box-shadow:
+    0 4px 16px rgba(126, 137, 202, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
   transition:
     border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .lifefix-step-card:hover {
-  border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.80);
+  border-color: rgba(126, 137, 202, 0.35);
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 24px rgba(126, 137, 202, 0.12),
+    0 0 16px rgba(141, 240, 236, 0.25);
 }
 
 .lifefix-step-card__header {
@@ -257,17 +330,19 @@
 }
 
 .lifefix-step-card__badge {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-brand-periwinkle) 0%, var(--color-brand-blue) 100%);
+  color: #FFFFFF;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(126, 137, 202, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   margin-top: 1px;
 }
 
@@ -287,7 +362,7 @@
 }
 
 .lifefix-step-card__title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-text-primary);
   line-height: 1.4;
@@ -309,16 +384,16 @@
 
 .lifefix-step-card__instruction {
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--color-text-primary);
   white-space: pre-wrap;
   word-break: break-word;
-  padding-left: calc(28px + var(--space-3));
+  padding-left: calc(32px + var(--space-3));
 }
 
 .lifefix-solution-steps--rtl .lifefix-step-card__instruction {
   padding-left: 0;
-  padding-right: calc(28px + var(--space-3));
+  padding-right: calc(32px + var(--space-3));
 }
 
 @media (max-width: 639px) {
@@ -338,10 +413,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  background-color: var(--color-background-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
+  background-color: rgba(244, 246, 252, 0.65);
+  border: 1px solid rgba(126, 137, 202, 0.16);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
 }
 
 .lifefix-explanations-section__title {
@@ -363,39 +438,40 @@
   align-items: baseline;
   gap: var(--space-2);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--color-text-secondary);
 }
 
 .lifefix-explanation-item__check {
-  color: var(--color-success);
+  color: #10B981;
   font-weight: bold;
   font-size: 14px;
   flex-shrink: 0;
 }
 
 /* ==========================================================================
-   5. Warnings & Notes Callout (DESIGN.md Section 11D)
+   5. Warnings & Notes Callout (Warm Peach / Champagne Tint)
    ========================================================================== */
 
 .lifefix-warning-callout {
-  background-color: var(--color-warning-soft);
-  border: 1px solid var(--color-warning-border);
-  border-left: 3px solid var(--color-warning);
-  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(255, 233, 217, 0.45) 0%, rgba(250, 246, 218, 0.35) 100%);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  border-left: 4px solid #D97706;
+  border-radius: var(--radius-lg);
   padding: 16px 20px;
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.06);
 }
 
 .lifefix-warning-callout--rtl {
-  border-left: 1px solid var(--color-warning-border);
-  border-right: 3px solid var(--color-warning);
+  border-left: 1px solid rgba(217, 119, 6, 0.25);
+  border-right: 4px solid #D97706;
 }
 
 .lifefix-warning-callout__icon {
-  color: var(--color-warning);
+  color: #D97706;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -413,7 +489,7 @@
 .lifefix-warning-callout__title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #B45309;
   margin: 0;
 }
 
@@ -427,7 +503,7 @@
 
 .lifefix-warning-callout__item {
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--color-text-primary);
   word-break: break-word;
 }
@@ -437,17 +513,17 @@
    ========================================================================== */
 
 .lifefix-followup-callout {
-  background-color: var(--color-primary-soft);
-  border: 1px solid var(--color-primary-border);
-  border-radius: var(--radius-md);
-  padding: 14px 18px;
+  background-color: rgba(126, 137, 202, 0.10);
+  border: 1px solid rgba(126, 137, 202, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
 }
 
 .lifefix-followup-callout__icon {
-  color: var(--color-primary);
+  color: var(--color-brand-periwinkle);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -458,34 +534,34 @@
 .lifefix-followup-callout__content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   flex: 1;
 }
 
 .lifefix-followup-callout__title {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-brand-periwinkle);
   margin: 0;
 }
 
 .lifefix-followup-callout__text {
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--color-text-primary);
   margin: 0;
 }
 
 /* ==========================================================================
-   7. Source Knowledge Attribution (DESIGN.md Section 11E)
+   7. Source Knowledge Attribution
    ========================================================================== */
 
 .lifefix-source-cases {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-3);
+  border-top: 1px solid rgba(126, 137, 202, 0.14);
 }
 
 .lifefix-source-cases__header {
@@ -499,14 +575,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-info);
+  color: var(--color-brand-periwinkle);
 }
 
 .lifefix-source-cases__title {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: var(--color-text-muted);
   margin: 0;
 }
@@ -522,20 +598,20 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: var(--color-info-soft);
-  color: var(--color-info);
-  border: 1px solid var(--color-info-border);
+  background-color: rgba(126, 137, 202, 0.10);
+  color: var(--color-brand-periwinkle);
+  border: 1px solid rgba(126, 137, 202, 0.25);
   font-size: 12px;
   line-height: 1.4;
-  padding: 3px 8px;
-  border-radius: var(--radius-xs);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
   max-width: 100%;
 }
 
 .lifefix-source-pill__id {
   font-family: var(--font-mono);
   font-weight: 600;
-  opacity: 0.85;
+  color: var(--color-brand-periwinkle);
 }
 
 .lifefix-source-pill__title {
