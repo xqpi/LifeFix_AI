@@ -409,9 +409,3 @@ The codebase has undergone verification across database, authentication, RAG, an
 - **Cloud Deployment:** Netlify frontend deployment and cloud database/backend hosting have not started yet.
 
 ---
-
-## 15. Project Information
-
-- **Project:** LifeFix
-- **Department:** Computer Science / Artificial Intelligence
-- **Institution:** Middle East University
